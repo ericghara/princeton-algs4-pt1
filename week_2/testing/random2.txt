@@ -1,0 +1,24 @@
+size
+enqueue Eric
+enqueue Is
+enqueue Awesome
+size
+sample
+isempty
+dequeue
+enqueue more
+enqueue time
+enqueue to
+enqueue survive
+dequeue
+dequeue
+dequeue
+sample
+dequeue
+sample
+dequeue
+isempty
+size
+dequeue
+isempty
+size

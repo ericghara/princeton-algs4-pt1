@@ -1,0 +1,21 @@
+<+ one
+<+ two
++> neg one
++> neg two
+iterate
+size
+isempty
++> neg three
+<+ three
+iterate
+<-
+<-
+<-
+iterate
+itest
+->
+->
+->
+isempty
+size
+iterate

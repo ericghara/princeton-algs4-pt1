@@ -1,0 +1,14 @@
+<+ hi 
+<+ med 
++> low 
+iterate
++> dummy1 
+<+ dummy2
+->
+<-
+iterate
+->
+<-
+iterate
+<- 
+iterate

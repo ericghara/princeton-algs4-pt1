@@ -1,0 +1,20 @@
+size
+enqueue Eric
+enqueue Is
+enqueue Awesome
+size
+sample
+isempty
+enqueue more
+enqueue time
+enqueue to
+enqueue survive
+enqueue seven
+enqueue eight
+sample
+sample
+isempty
+size
+isempty
+size
+iterate
