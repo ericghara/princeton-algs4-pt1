@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    ivy {
+        url 'https://algs4.cs.princeton.edu/code/'
+
+        patternLayout {
+            artifact '[module].jar'
+        }
+
+        // This is required in Gradle 6.0+ as metadata file (ivy.xml)
+        // is mandatory. Docs linked below this code section
+        metadataSources { artifact() }
+    }
+
+}
+
+dependencies {
+    implementation group: 'edu.princeton.cs', name: 'algs4', version: '1.0.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
