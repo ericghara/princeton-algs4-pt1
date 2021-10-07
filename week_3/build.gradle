@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'org.example'
@@ -27,6 +28,22 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
+application {
+    // usage example: gradle -PmainClass=XYZ run --info
+    mainClassName = project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL"
+}
+
 test {
     useJUnitPlatform()
 }
+
+task srcZip(type: Zip) {
+    //Zips all files in src's child directories.
+    //find zip in distributions folder
+    archiveFileName = "collinear.zip"
+    archiveClassifier = 'src'
+    exclude "LineSegment.java"
+    from sourceSets*.allSource
+}
+
+tasks.named("build") { finalizedBy("srcZip") }
