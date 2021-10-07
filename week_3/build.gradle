@@ -29,7 +29,7 @@ dependencies {
 }
 
 application {
-    // usage example: gradle -PmainClass=XYZ run --info
+    // usage example: gradle -PmainClass=XYZ run --args=ARGS --info
     mainClassName = project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL"
 }
 
