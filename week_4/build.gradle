@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    ivy {
+        url 'https://algs4.cs.princeton.edu/code/'
+
+        patternLayout {
+            artifact '[module].jar'
+        }
+
+        // This is required in Gradle 6.0+ as metadata file (ivy.xml)
+        // is mandatory. Docs linked below this code section
+        metadataSources { artifact() }
+    }
+
+}
+
+dependencies {
+    implementation group: 'edu.princeton.cs', name: 'algs4', version: '1.0.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+application {
+    // usage example: gradle -PmainClass=XYZ run --args=ARGS --info
+    mainClassName = project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task srcZip(type: Zip) {
+    //Zips all files in src's child directories.
+    //find zip in distributions folder
+    archiveFileName = "8puzzle.zip"
+    archiveClassifier = 'src'
+    exclude "PuzzleChecker.java"
+    from sourceSets*.allSource
+}
+
+tasks.named("build") { finalizedBy("srcZip") }
