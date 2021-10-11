@@ -47,3 +47,15 @@ task srcZip(type: Zip) {
 }
 
 tasks.named("build") { finalizedBy("srcZip") }
+
+sourceSets {
+    main {
+        java {
+            // * include or exclude sources in build
+            // * **** USAGE ****
+            // * exclude "**/Someclass.java"
+            // * include "**/SomeClass.java"
+            include "**/Board.java"
+        }
+    }
+}
