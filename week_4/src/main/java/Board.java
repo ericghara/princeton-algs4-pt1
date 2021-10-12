@@ -1,82 +1,78 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.LinkedList;
 
+/* This creates a board data type that is used by the solver.
+*  Board 2d board is represented as a 1d array of chars.
+*  While slightly cumbersome this is done more than half
+*  memory usage vs a 2d array of ints.
+*
+* Board incorperates 2 priority functions, manhattan and hamming;
+* Manhattan is more efficient and is what is actually used by solver.
+ */
 
-// Note autograder would not allow implementing iterator interface on Board...therefore was forced to use raw iterator in while loops instead of for each
-// Hence some loops may look a little odd.
+
 public class Board {
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
-    private int[][] brd;
-    private final int N;
+    private final char[] brd; // using char to save memory; since solver requires exponential time,
+    private final char N;  // num of rows and cols (virtual as board was flattened to 1d array)
+    private final char NbyN; // total number of elements in board
 
+    // converts 2D array to a board
     public Board(int[][] tiles) {
-        N = tiles.length;
-        brd = new int[N][N];
-        for (int r = 0; r < N; r++) { brd[r] = tiles[r].clone(); }
-    }
-
-    private Iterator<Integer> iterator() {
-        return new BoardIterator();
-    }
-
-    private class BoardIterator implements Iterator<Integer> {
-        int row = 0, col = 0;
-
-        public boolean hasNext() { return row < N; }
-
-        public void remove() { throw new UnsupportedOperationException("Remove has not been implemented."); }
-
-        public Integer next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException("You have iterated through the entire board.");
+        N = (char) tiles.length;
+        NbyN = (char) (N * N);
+        brd = new char[NbyN];
+        for (char r = 0; r < N; r++) {
+            for (char c = 0; c < N; c++) {
+                brd[r * N + c] = (char) tiles[r][c];
             }
-            int val = brd[row][col++];
-            if (col == N) {
-                col = 0;
-                row++;
-            }
-            return val;
         }
     }
 
-    private Iterator<Integer> GoalIterator() {
-        return new GoalIterator();
+    // Overloaded to allow board creation from 1D arrays
+    // Be careful no input data checking
+    private Board(char[] tiles) {
+        brd = tiles.clone();
+        N = (char) Math.sqrt(tiles.length);
+        NbyN = (char) (N * N);
     }
 
-    private class GoalIterator implements Iterator<Integer> {
 
-        final int END = N * N;
-        int cur = 0;
+    // This is the sequence of a solved board i.e.: 1, 2, 3...NxN-1, 0
+    private Iterable<Character> goalBoard() {
+        LinkedList<Character> goal = new LinkedList<>();
 
-        public boolean hasNext() { return cur < END; }
-
-        public void remove() { throw new UnsupportedOperationException("Remove has not been implemented."); }
-
-        public Integer next() { return ++cur < END ? cur : 0; } // returns 1, 2, 3, END-1, 0
+        for (char pos = 1; pos < this.NbyN; pos++) { goal.addLast(pos); }
+        goal.addLast((char) 0);
+        return goal;
     }
 
-    // all neighboring boards
+    // All potential boards accessible in one move.
+    // Practically this means all possible moves where
+    // Tiles surrounding blank space are moved into
+    // Blank space.
     public Iterable<Board> neighbors() {
-        int N = this.dimension();
-        int pos = 0;
-        Iterator<Integer> boardItr =  new BoardIterator();
-         while (boardItr.hasNext()) {
-            if (boardItr.next() == 0) { break; }
-            pos++;
+        int N = this.N;
+        char posBlank = 0;
+        for (char tile : brd) {
+            if (tile == 0) { break; }
+            posBlank++;
         }
-        int rowBlank = pos/N, colBlank = pos % N;
+        char rowBlank = (char) (posBlank/N);
+        char colBlank = (char) (posBlank % N);
         LinkedList<Board> boards = new LinkedList<>();
         int[][] MOVES = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
         for (int[] move : MOVES) {
-            int r = rowBlank + move[0], c = colBlank + move[1];
-            if (0 <= r && r < N && 0 <= c && c < N) {
-                int[][] thisMove = boardToArray();
-                swap(rowBlank, colBlank, r, c, thisMove);
+            int rNew = rowBlank + move[0];
+            int cNew = colBlank + move[1];
+            if (0 <= rNew && rNew < N && 0 <= cNew && cNew < N) {
+                char posNew = (char) (rNew * N + cNew);
+                char[] thisMove = brd.clone();
+                swap(posNew, posBlank, thisMove);
                 boards.add(new Board(thisMove));
             }
         }
@@ -88,9 +84,8 @@ public class Board {
         StringBuilder str = new StringBuilder();
         str.append(dimension()).append("\n");
         short cnt = 0; // from prompt max N = 128
-        Iterator<Integer> boardItr =  new BoardIterator();
-        while (boardItr.hasNext()) {
-            str.append(String.format("%2d ", boardItr.next()));
+        for (char tile: brd) {
+            str.append(String.format("%2d ", (int) tile ));
             if (++cnt % N == 0) {
                 str.append('\n');
             }
@@ -103,27 +98,24 @@ public class Board {
 
     // number of tiles out of place
     public int hamming() {
-        Iterator GoalIter = new GoalIterator();
-        Iterator<Integer> boardItr =  new BoardIterator();
         int oops = 0; // out of place
-        while (boardItr.hasNext()) {
-            int targ = (int) GoalIter.next();
-            if (targ != boardItr.next() && targ != 0) {
-                oops++;
-            }
+        Iterator<Character> goalIter = goalBoard().iterator();
+        for (char cur: brd) {
+            char targ = goalIter.next();
+            if (targ != cur && targ != 0) { oops++;}
         }
         return oops;
     }
 
+    // Sum of horizontal and vertical distances that out of place tiles need to move
+    // to solve board
     public int manhattan() {
-        Iterator GoalIter = new GoalIterator();
-        Iterator<Integer> boardItr =  new BoardIterator();
+        Iterator<Character> goalIter = goalBoard().iterator();
         int manSum = 0;
-        while (boardItr.hasNext()) {
-            int targ = (int) GoalIter.next();
-            int curTile = boardItr.next();
+        for (char curTile : brd) {
+            char targ = goalIter.next();
             if (curTile != targ  && curTile != 0) {
-                if (targ == 0) { targ = N * N; } // placement of blank tile is N*N
+                if (targ == 0) { targ = NbyN; } // placement of blank tile is at end
                 curTile --; targ--;
                 int dRow = Math.abs(curTile  / N - targ / N);
                 int dCol = Math.abs(curTile % N - targ % N);
@@ -134,7 +126,7 @@ public class Board {
     }
 
 
-    // is this board the goal board?
+    // is this board solved (goal)?
     public boolean isGoal() {
         return hamming() == 0;
     }
@@ -144,13 +136,8 @@ public class Board {
         if (y instanceof Board) {
             Board that = (Board) y;
             if (that.dimension() == this.dimension()) {
-                Iterator thisIter = new BoardIterator();
-                for (int r = 0; r < N; r++) {
-                    for (int c = 0; c < N; c++) {
-                        if (that.brd[r][c] != (int) thisIter.next()) {
-                            return false;
-                        }
-                    }
+                for (char i = 0; i < NbyN; i++) {
+                    if (this.brd[i] != that.brd[i]) { return false; }
                 }
                 return true;
             }
@@ -160,32 +147,28 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
-        int[][] twinBoard = boardToArray();
-        int ar = 0, ac = 0, br = 1, bc = 0;
-        if (twinBoard[ar][ac] == 0 || twinBoard[br][bc] == 0) { ac = 1; bc = 1;  }  // a = {0, 1}, b = {1, 1};
-        swap(ar, ac, br, bc, twinBoard);
+        char[] twinBoard = brd.clone();
+        char ia = 0, ib = 1;
+        if (twinBoard[ia] == 0 || twinBoard[ib] == 0) { ia += N; ib += N;  }  // a = {0, 1}, b = {1, 1};
+        swap(ia, ib, twinBoard);
         return new Board(twinBoard);
     }
 
-    // Swap values in NxN (board} arrays
-    // Usage: ar (a row), ac (a col)...array
-    private void swap(int ar, int ac, int br, int bc, int[][] board) {
-        int tmp = board[ar][ac];
-        board[ar][ac] = board[br][bc];
-        board[br][bc] = tmp;
+    // swap tiles at index ia and ib
+    private void swap(char ia, char ib, char[] board) {
+        char tmp = board[ia];
+        board[ia] = board[ib];
+        board[ib] = tmp;
     }
 
-    private int[][] boardToArray() {
-        int N = this.N;
-        int[][] out = new int[N][N];
-        Iterator curBoard = new BoardIterator();
-        for (int r = 0; r < N; r++) {
-            for (int c = 0; c < N; c++) { out[r][c] = (int) curBoard.next(); }
-        }
-        return out;
-    }
-
-    // unit testing (not graded)
+    /* unit testing
+    * Provide location to a board text file as a command line argument
+    * Text file format:
+    * 3
+    *  8  1  3
+    *  4  0  2
+    *  7  6  5
+    */
     public static void main(String[] args) {
         // for each command-line argument
         for (String filename : args) {

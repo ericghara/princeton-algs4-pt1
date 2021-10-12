@@ -3,11 +3,16 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import java.util.LinkedList;
 
+
+// Solves slider puzzles using an A* search algorithm.  Also detects if a board is unsolvable
 public class Solver {
     private int moves = -1;
     private SearchNode goalNode = null;
 
-    // find a solution to the initial board (using the A* algorithm)
+    /* A* implemented using a min priority queue and a priority function based on
+    *  # moves made + summation of vertical and horizontal distances of all out of
+    *  place tiles from their target positions. (see Manhattan function in Board module)
+    *  Utilizes a game tree to keep track of all potential moves (see SearchNode) */
     public Solver(Board initial) {
         if (initial == null) { throw new IllegalArgumentException("Received a null board as an input."); }
         MinPQ<SearchNode> PQ = new MinPQ<>();
@@ -19,7 +24,7 @@ public class Solver {
                 goalNode = minNode;
                 break;
             }
-            if (( minNode.getPriority() - minNode.getMoves() ) <= 2 && minNode.twinIsGoal()) { break; }  // only useful to start checking twin close to goal
+            if (( minNode.getPriority() - minNode.getMoves() ) == 2 && minNode.twinIsGoal()) { break; }  // only useful to start checking twin close to goal
             for (Board nbr : minNode.getNeighbors() ) {
                 if (minNode.getMoves() > 0) {
                     if (!nbr.equals(minNode.getParent().getBoard())) {  // optimization
@@ -52,9 +57,15 @@ public class Solver {
     }
 
 
+    /*  Tree data structure where each node stores a board and caches its priority func values
+    *   Structure: Root is null (level 0), initial board (level 1), all possible moves from initial board (level 2)...
+    *   All Boards connect back to their parent, so when a solution is found traversal from solved board
+    *   to parent boards is possible and this path represents (the reverse of) the shortest path from root to a
+    *   solved board.
+    */
     private class SearchNode implements Comparable<SearchNode> {
-        final private SearchNode parent;
-        final private Board board;
+        private final  SearchNode parent;
+        private final Board board;
         private int moves = 0;
         private int priority;
         SearchNode(Board curBoard, SearchNode parentNode) {
