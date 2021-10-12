@@ -55,7 +55,6 @@ sourceSets {
             // * **** USAGE ****
             // * exclude "**/Someclass.java"
             // * include "**/SomeClass.java"
-            include "**/Board.java"
         }
     }
 }

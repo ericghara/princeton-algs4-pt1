@@ -1,6 +1,5 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.LinkedList;
@@ -13,8 +12,9 @@ public class Board implements Iterable<Integer> {
     private final int N;
 
     public Board(int[][] tiles) {
-        brd = tiles.clone();
-        N = brd.length;
+        N = tiles.length;
+        brd = new int[N][N];
+        for (int r = 0; r < N; r++) { brd[r] = tiles[r].clone(); }
     }
 
     public Iterator<Integer> iterator() {
@@ -115,7 +115,7 @@ public class Board implements Iterable<Integer> {
         for (int curTile : Board.this) {
             int targ = (int) GoalIter.next();
             if (curTile != targ  && curTile != 0) {
-                if (targ == 0) { targ = N*N; } // placement of blank tile is N*N
+                if (targ == 0) { targ = N * N; } // placement of blank tile is N*N
                 int delta = Math.abs(curTile - targ);
                 manSum += (delta / N) + (delta % N);
             }
@@ -156,6 +156,8 @@ public class Board implements Iterable<Integer> {
         return new Board(twinBoard);
     }
 
+    // Swap values in NxN (board} arrays
+    // Usage: ar (a row), ac (a col)...array
     private void swap(int ar, int ac, int br, int bc, int[][] board) {
         int tmp = board[ar][ac];
         board[ar][ac] = board[br][bc];
