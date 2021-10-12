@@ -4,9 +4,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /* This creates a board data type that is used by the solver.
-*  Board 2d board is represented as a 1d array of chars.
-*  While slightly cumbersome this is done more than half
-*  memory usage vs a 2d array of ints.
+*  Board 2D board is represented as a 1D array of chars.
+*  While slightly cumbersome this is done more than halves
+*  memory usage vs a 2D array of ints.
 *
 * Board incorperates 2 priority functions, manhattan and hamming;
 * Manhattan is more efficient and is what is actually used by solver.
@@ -196,5 +196,3 @@ public class Board {
     }
 
 }
-
-
