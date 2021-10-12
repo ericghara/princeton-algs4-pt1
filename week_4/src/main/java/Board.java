@@ -4,7 +4,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.LinkedList;
 
-public class Board implements Iterable<Integer> {
+
+// Note autograder would not allow implementing iterator interface on Board...therefore was forced to use raw iterator in while loops instead of for each
+// Hence some loops may look a little odd.
+public class Board {
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
@@ -17,7 +20,7 @@ public class Board implements Iterable<Integer> {
         for (int r = 0; r < N; r++) { brd[r] = tiles[r].clone(); }
     }
 
-    public Iterator<Integer> iterator() {
+    private Iterator<Integer> iterator() {
         return new BoardIterator();
     }
 
@@ -61,8 +64,9 @@ public class Board implements Iterable<Integer> {
     public Iterable<Board> neighbors() {
         int N = this.dimension();
         int pos = 0;
-        for (int val : Board.this) {
-            if (val == 0) { break; }
+        Iterator<Integer> boardItr =  new BoardIterator();
+         while (boardItr.hasNext()) {
+            if (boardItr.next() == 0) { break; }
             pos++;
         }
         int rowBlank = pos/N, colBlank = pos % N;
@@ -84,8 +88,9 @@ public class Board implements Iterable<Integer> {
         StringBuilder str = new StringBuilder();
         str.append(dimension()).append("\n");
         short cnt = 0; // from prompt max N = 128
-        for (int tile : Board.this) {
-            str.append(String.format("%2d ", tile));
+        Iterator<Integer> boardItr =  new BoardIterator();
+        while (boardItr.hasNext()) {
+            str.append(String.format("%2d ", boardItr.next()));
             if (++cnt % N == 0) {
                 str.append('\n');
             }
@@ -99,10 +104,11 @@ public class Board implements Iterable<Integer> {
     // number of tiles out of place
     public int hamming() {
         Iterator GoalIter = new GoalIterator();
+        Iterator<Integer> boardItr =  new BoardIterator();
         int oops = 0; // out of place
-        for (int curTile : Board.this) {
+        while (boardItr.hasNext()) {
             int targ = (int) GoalIter.next();
-            if (targ != curTile && targ != 0) {
+            if (targ != boardItr.next() && targ != 0) {
                 oops++;
             }
         }
@@ -111,13 +117,17 @@ public class Board implements Iterable<Integer> {
 
     public int manhattan() {
         Iterator GoalIter = new GoalIterator();
+        Iterator<Integer> boardItr =  new BoardIterator();
         int manSum = 0;
-        for (int curTile : Board.this) {
+        while (boardItr.hasNext()) {
             int targ = (int) GoalIter.next();
+            int curTile = boardItr.next();
             if (curTile != targ  && curTile != 0) {
                 if (targ == 0) { targ = N * N; } // placement of blank tile is N*N
-                int delta = Math.abs(curTile - targ);
-                manSum += (delta / N) + (delta % N);
+                curTile --; targ--;
+                int dRow = Math.abs(curTile  / N - targ / N);
+                int dCol = Math.abs(curTile % N - targ % N);
+                manSum += dRow + dCol;
             }
         }
         return manSum;
@@ -135,10 +145,11 @@ public class Board implements Iterable<Integer> {
             Board that = (Board) y;
             if (that.dimension() == this.dimension()) {
                 Iterator thisIter = new BoardIterator();
-                for (int thatVal : that) {
-                    int thisVal = (int) thisIter.next();
-                    if (thatVal != thisVal) {
-                        return false;
+                for (int r = 0; r < N; r++) {
+                    for (int c = 0; c < N; c++) {
+                        if (that.brd[r][c] != (int) thisIter.next()) {
+                            return false;
+                        }
                     }
                 }
                 return true;

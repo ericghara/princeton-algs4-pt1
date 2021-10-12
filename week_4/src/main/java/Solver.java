@@ -21,9 +21,12 @@ public class Solver {
             }
             if (( minNode.getPriority() - minNode.getMoves() ) <= 2 && minNode.twinIsGoal()) { break; }  // only useful to start checking twin close to goal
             for (Board nbr : minNode.getNeighbors() ) {
-                if (!nbr.equals(minNode.getBoard())) {  // optimization
-                    PQ.insert(new SearchNode(nbr, minNode));
+                if (minNode.getMoves() > 0) {
+                    if (!nbr.equals(minNode.getParent().getBoard())) {  // optimization
+                        PQ.insert(new SearchNode(nbr, minNode));
+                    }
                 }
+                else { PQ.insert(new SearchNode(nbr, minNode)); }
             }
         }
     }
@@ -36,8 +39,9 @@ public class Solver {
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
-        LinkedList<Board> out = new LinkedList<>();
+        LinkedList<Board> out = null;
         if (isSolvable()) {
+            out = new LinkedList<>();
             SearchNode curNode = goalNode;
             while (curNode != null ) {
                 out.addFirst(curNode.getBoard());
@@ -57,7 +61,7 @@ public class Solver {
             board = curBoard;
             parent = parentNode;
             if (parent != null) { moves = parent.getMoves() + 1; }
-            setHPriority();
+            setMPriority();
 
         }
         private int getMoves() { return moves; }
