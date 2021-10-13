@@ -154,7 +154,7 @@ public class Board {
     public Board twin() {
         char[] twinBoard = brd.clone();
         char ia = 0, ib = 1;
-        if (twinBoard[ia] == 0 || twinBoard[ib] == 0) { ia += N; ib += N;  }  // a = {0, 1}, b = {1, 1};
+        if (twinBoard[ia] == 0 || twinBoard[ib] == 0) { ia += N; ib += N;  }  // swap would be valid move, so go to next row
         swap(ia, ib, twinBoard);
         return new Board(twinBoard);
     }
