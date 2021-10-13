@@ -8,7 +8,7 @@ import java.util.ArrayList;
 *  While slightly cumbersome this is done more than halves
 *  memory usage vs a 2D array of ints.
 *
-* Board incorperates 2 priority functions, manhattan and hamming;
+* Board incorporates 2 priority functions, manhattan and hamming;
 * Manhattan is more efficient and is what is actually used by solver.
  */
 

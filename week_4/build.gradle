@@ -35,8 +35,8 @@ dependencies {
 }
 
 application {
-    // usage example: gradle -PmainClass=XYZ run --args=ARGS --info
-    mainClassName = project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL"
+    // usage example: gradle run -PmainClass=XYZ --args=ARGS --info
+    setMainClass(project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL")
 }
 
 test {
