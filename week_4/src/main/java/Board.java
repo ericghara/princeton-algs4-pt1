@@ -137,6 +137,7 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
+        if (y == this) { return true; }
         if (y instanceof Board) {
             Board that = (Board) y;
             if (that.dimension() == this.dimension()) {
