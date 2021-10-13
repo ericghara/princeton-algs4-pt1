@@ -22,7 +22,6 @@ repositories {
         }
 
         // This is required in Gradle 6.0+ as metadata file (ivy.xml)
-        // is mandatory. Docs linked below this code section
         metadataSources { artifact() }
     }
 
