@@ -1,7 +1,7 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /* This creates a board data type that is used by the solver.
 *  Board 2d board is represented as a 1d array of chars.
@@ -44,12 +44,16 @@ public class Board {
 
     // This is the sequence of a solved board i.e.: 1, 2, 3...NxN-1, 0
     private Iterable<Character> goalBoard() {
-        LinkedList<Character> goal = new LinkedList<>();
+        ArrayList<Character> goal = new ArrayList<>(NbyN);
 
-        for (char pos = 1; pos < this.NbyN; pos++) { goal.addLast(pos); }
-        goal.addLast((char) 0);
+        for (char pos = 1; pos < this.NbyN; pos++) { goal.add(pos); }
+        goal.add((char) 0);
         return goal;
     }
+
+    /*private Iterable<Character> goalBoard() {
+        List goal = new List<Character>();
+    }*/
 
     // All potential boards accessible in one move.
     // Practically this means all possible moves where
@@ -64,7 +68,7 @@ public class Board {
         }
         char rowBlank = (char) (posBlank/N);
         char colBlank = (char) (posBlank % N);
-        LinkedList<Board> boards = new LinkedList<>();
+        var boards = new ArrayList<Board>(2);
         int[][] MOVES = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
         for (int[] move : MOVES) {
             int rNew = rowBlank + move[0];
