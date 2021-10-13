@@ -68,7 +68,7 @@ public class Board {
         }
         char rowBlank = (char) (posBlank/N);
         char colBlank = (char) (posBlank % N);
-        var boards = new ArrayList<Board>(2);
+        ArrayList<Board> boards = new ArrayList<>(2);
         int[][] MOVES = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
         for (int[] move : MOVES) {
             int rNew = rowBlank + move[0];
