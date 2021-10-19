@@ -31,6 +31,7 @@ public class PointSET {
 
     // does the set contain point p?
     public boolean contains(Point2D p) {
+        errorOnNull(p);
         return points.contains(p);
     }
 
@@ -39,6 +40,7 @@ public class PointSET {
 
     // all points that are inside the rectangle (or on the boundary)
     public Iterable<Point2D> range(RectHV rect) {
+        errorOnNull(rect);
         ArrayList<Point2D> insidePoints = new ArrayList<>();
         for (Point2D p : points) {
             if (rect.contains(p)) {
@@ -50,6 +52,7 @@ public class PointSET {
 
     // a nearest neighbor in the set to point p; null if the set is empty
     public Point2D nearest(Point2D p) {
+        errorOnNull(p);
         if (points.contains(p)) {
             return p;
         }  // optimization; constant time if in p in set
@@ -80,6 +83,19 @@ public class PointSET {
             Point2D p = new Point2D(x, y);
             brute.insert(p);
         }
+        in = new In(filename);
+        int cnt = 0; int found = 0;
+        while (!in.isEmpty()) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+            Point2D p = new Point2D(x, y);
+            if (!brute.contains(p)) {
+                System.out.printf("Couldn't find %1$s in set!%n", p);
+            }
+            else { found++; }
+            cnt++;
+        }
+        System.out.printf("Set contained %1$d items; %2$d were found.%n", cnt,found);
         StdDraw.enableDoubleBuffering();
         while (true) {
 

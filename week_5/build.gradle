@@ -19,7 +19,7 @@ sourceSets {
             // * **** USAGE ****
             // * exclude "**/Someclass.java"
             // * include "**/SomeClass.java"
-            exclude "**/KdTreeGenerator.java", "**/KdTreeVisualizer.java", "**/NearestNeighborVisualizer.java", "**/RangeSearchVisualizer.java", "**/KdTree.java"
+            //exclude "**/KdTreeVisualizer.java", "**/NearestNeighborVisualizer.java", "**/RangeSearchVisualizer.java"
         }
     }
 }
@@ -59,6 +59,7 @@ task srcZip(type: Zip) {
     //find zip in distributions folder
     // exclude this.java
     // include that.java
+    exclude "**/KdTreeVisualizer.java", "**/NearestNeighborVisualizer.java", "**/RangeSearchVisualizer.java", "**/KdTreeGenerator.java"
     archiveFileName = "kdtree.zip"
     archiveClassifier = 'src'
     from sourceSets*.allSource
