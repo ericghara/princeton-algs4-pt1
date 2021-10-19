@@ -9,15 +9,41 @@ import edu.princeton.cs.algs4.StdDraw;
 
 
 public class KdTree {
-    private KdNode root;
-    private int N;  //num elements
     private static final Comparator<KdNode> KD_ORDER = new KdOrder();
+    private KdNode root;
+    private int N = 0;  //num elements
     private enum Direction {L, R}
     private enum Dimension {X, Y}
 
-
-    public KdTree() {
-        N = 0;
+    public void insert(Point2D p) {
+        errorOnNull(p);
+        KdNode newNode = new KdNode(p);
+        // First item
+        if (root == null) {
+            root = newNode;
+            root.order = Dimension.X;
+            root.Xrange = new KdRange();
+            root.Yrange = new KdRange();
+            return;
+        }
+        // Just after placement head will become newNode, breaking loop (see below)
+        for (KdNode head = root; !head.equals(newNode);) {
+            int cmp = KD_ORDER.compare(newNode, head);
+            if (cmp < 0) {
+                if (head.left == null) { head.add(Direction.L, newNode); break; }
+                head = head.left;
+            }
+            else if (cmp > 0) {
+                if (head.right == null) { head.add(Direction.R, newNode); break; }
+                head = head.right;
+            }
+            else {
+                if (newNode.equals(head)) {return; } // Avoid degenerates, wasteful to find with contains
+                if (head.right == null) { head.add(Direction.R, newNode); }
+                head = head.right;  // head will become newNode if it was placed, if not standard go right on equals
+            }
+        }
+        N ++;
     }
 
     public boolean contains(Point2D p) {
@@ -38,34 +64,6 @@ public class KdTree {
             }
         }
         return false;
-    }
-
-    public void insert(Point2D p) {
-        errorOnNull(p);
-        if ( contains(p) ) { return; }  // Avoid degenerates
-        N ++;
-        KdNode newNode = new KdNode(p);
-        // First item
-        if (root == null) {
-            root = newNode;
-            root.order = Dimension.X;
-            root.Xrange = new KdRange();
-            root.Yrange = new KdRange();
-            return;
-        }
-        KdNode head = root;
-        // Right after newNode is placed root == newNode (note more robust than root.equals(newNode))
-        while (true) {
-            int cmp = KD_ORDER.compare(newNode, head);
-            if (cmp < 0) {
-                if (head.left == null) { head.add(Direction.L, newNode); break; }
-                head = head.left;
-            }
-            else {
-                if (head.right == null) { head.add(Direction.R, newNode); break; }
-                head = head.right;
-            }
-        }
     }
 
     // A modified DFS, first goes towards point P, but maintains a stack
@@ -111,8 +109,7 @@ public class KdTree {
         return size() == 0;
     }
 
-    // returns nodes in level order from root (ie excluding sentinel)
-    // Implemented for debugging, also used by draw (although overkill)
+    // returns nodes in level order from root
     private Iterable<KdNode> allNodes() {
         ArrayList<KdNode> nodes = new ArrayList<>(N);
         LinkedList<KdNode> deque = new LinkedList<>();
@@ -164,9 +161,9 @@ public class KdTree {
     }
 
     private class KdNode implements Comparable<KdNode> {
+        final Point2D point;
         KdNode left = null;
         KdNode right = null;
-        final Point2D point;
         KdRange Xrange, Yrange;
         KdTree.Dimension order;
 
@@ -192,7 +189,14 @@ public class KdTree {
         public int compareTo(KdNode that) { return this.point.compareTo(that.point); }
 
         // Ignores dimension
-        public boolean equals(KdNode that) { return this.point.equals(that.point); }
+        @Override
+        public boolean equals(Object that) {
+            if (that instanceof KdNode) {
+                KdNode thatNode = (KdNode) that;
+                return this.point.equals(thatNode.point);
+            }
+            return true;
+        }
 
         public double SubtreeDistanceSquaredTo(Point2D p, Direction dir) {
             KdNode child;
@@ -209,6 +213,7 @@ public class KdTree {
             else if (p.y() > ymax) dy = p.y() - ymax;
             return dx*dx + dy*dy;
         }
+
         public boolean intersects(RectHV rect) {
             return Xrange.max >= rect.xmin() && Yrange.max >= rect.ymin()
                     && rect.xmax() >= Xrange.min && rect.ymax() >= Yrange.min;
@@ -218,7 +223,7 @@ public class KdTree {
     private class KdRange {
         double min, max;
 
-        public KdRange() { min = 0; max = 1; }  // for sentinel
+        public KdRange() { min = 0; max = 1; }  // only used by first node added
 
         public KdRange(double parentCoord, KdRange parentRange, Direction dir) {
             if (dir == Direction.L) { max = parentCoord; min = parentRange.min; }
@@ -226,7 +231,8 @@ public class KdTree {
         }
     }
 
-
+    // test client input filetype point coordinates separated by spaces. 1 point per line
+    // Input coordinates should range from 0 0 to 1 1
     public static void main(String[] args) {
         String filename = args[0];
         In in = new In(filename);
@@ -239,7 +245,7 @@ public class KdTree {
         }
         in = new In(filename);
         int cnt = 0; int found = 0;
-        // Check that all added points can be found in tree
+        // Check that all added points can be found in the tree
         while (!in.isEmpty()) {
             double x = in.readDouble();
             double y = in.readDouble();
