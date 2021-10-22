@@ -29,7 +29,7 @@ public class KdTree {
         }
         // For loop breaks on a duplicate while traversing tree
         // After a new node is added, loop detects it as a 'duplicate' ending loop
-        for (KdNode head = root; !head.equals(newNode);) {
+        for (KdNode head = root; head.compareTo(newNode) != 0;) {
             int cmp = KD_ORDER.compare(newNode, head);
             if (cmp < 0) {
                 if (head.left == null) { head.add(Direction.L, newNode); }
@@ -56,7 +56,7 @@ public class KdTree {
                 head = head.right;
             }
             else {
-                if ( head.equals(query) ) { return true; }
+                if ( head.compareTo(query) == 0 ) { return true; }
                 head = head.right;
             }
         }
@@ -192,16 +192,6 @@ public class KdTree {
 
         // Natural order. Priority Y then X; ignores dimension
         public int compareTo(KdNode that) { return this.point.compareTo(that.point); }
-
-        // Ignores dimension
-        @Override
-        public boolean equals(Object that) {
-            if (that instanceof KdNode) {
-                KdNode thatNode = (KdNode) that;
-                return this.point.equals(thatNode.point);
-            }
-            return true;
-        }
 
         public double SubtreeDistanceSquaredTo(Point2D p, Direction dir) {
             KdNode child;
