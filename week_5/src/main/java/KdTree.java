@@ -22,8 +22,7 @@ public class KdTree {
         if (root == null) {
             root = newNode;
             root.order = Dimension.X;
-            root.Xrange = new KdRange();
-            root.Yrange = new KdRange();
+            root.range = new RectHV(0, 0, 1, 1);
             N++;
             return;
         }
@@ -168,7 +167,7 @@ public class KdTree {
         final Point2D point;
         KdNode left = null;
         KdNode right = null;
-        KdRange Xrange, Yrange;
+        RectHV range;
         KdTree.Dimension order;
 
         public KdNode(Point2D p) {
@@ -176,55 +175,58 @@ public class KdTree {
         }
 
         private void add(Direction dir, KdNode child) {
+            double xmax, xmin, ymax, ymin;
+            xmin = range.xmin();
+            ymin = range.ymin();
+            xmax = range.xmax();
+            ymax = range.ymax();
             N++;
             if (order == Dimension.X) {
                 child.order = Dimension.Y;
-                child.Xrange = new KdRange(point.x(), Xrange, dir);
-                child.Yrange = Yrange;
+                if (dir == Direction.L) {
+                    xmax = point.x();
+                } else {
+                    xmin = point.x();
+                }
             } else {
                 child.order = Dimension.X;
-                child.Xrange = Xrange;
-                child.Yrange = new KdRange(point.y(), Yrange, dir);
+                if (dir == Direction.L) {
+                    ymax = point.y();
+                } else {
+                    ymin = point.y();
+                }
             }
-            if (dir == Direction.L) { left = child;}
-            else { right = child; }
+
+            child.range = new RectHV(xmin, ymin, xmax, ymax);
+            if (dir == Direction.L) {
+                left = child;
+            } else {
+                right = child;
+            }
         }
 
         // Natural order. Priority Y then X; ignores dimension
-        public int compareTo(KdNode that) { return this.point.compareTo(that.point); }
+        public int compareTo(KdNode that) {
+            return this.point.compareTo(that.point);
+        }
 
         public double SubtreeDistanceSquaredTo(Point2D p, Direction dir) {
             KdNode child;
-            if (dir == Direction.L) { child = left; }
-            else { child = right; }
-            if (child == null) { return Double.POSITIVE_INFINITY; }
-            double xmin = child.Xrange.min, xmax = child.Xrange.max,
-                    ymin = child.Yrange.min, ymax = child.Yrange.max;
-            //Adapted from edu.princeton.cs.algs4.RectHV.distanceSquaredTo
-            double dx = 0.0, dy = 0.0;
-            if      (p.x() < xmin) dx = p.x() - xmin;
-            else if (p.x() > xmax) dx = p.x() - xmax;
-            if      (p.y() < ymin) dy = p.y() - ymin;
-            else if (p.y() > ymax) dy = p.y() - ymax;
-            return dx*dx + dy*dy;
+            if (dir == Direction.L) {
+                child = left;
+            } else {
+                child = right;
+            }
+            if (child == null) {
+                return Double.POSITIVE_INFINITY;
+            }
+            return child.range.distanceSquaredTo(p);
         }
 
-        public boolean intersects(RectHV rect) {
-            return Xrange.max >= rect.xmin() && Yrange.max >= rect.ymin()
-                    && rect.xmax() >= Xrange.min && rect.ymax() >= Yrange.min;
-        }
+        public boolean intersects(RectHV rect) { return range.intersects(rect); }
 
     }
-    private class KdRange {
-        double min, max;
 
-        public KdRange() { min = 0; max = 1; }  // only used by first node added
-
-        public KdRange(double parentCoord, KdRange parentRange, Direction dir) {
-            if (dir == Direction.L) { max = parentCoord; min = parentRange.min; }
-            else { min = parentCoord; max = parentRange.max; }
-        }
-    }
 
     // test client input filetype point coordinates separated by spaces. 1 point per line
     // Input coordinates should range from 0 0 to 1 1
