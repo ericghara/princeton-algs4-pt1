@@ -24,28 +24,25 @@ public class KdTree {
             root.order = Dimension.X;
             root.Xrange = new KdRange();
             root.Yrange = new KdRange();
+            N++;
             return;
         }
-        // Just after placement head will become newNode, breaking loop (see below)
+        // For loop breaks on a duplicate while traversing tree
+        // After a new node is added, loop detects it as a 'duplicate' ending loop
         for (KdNode head = root; !head.equals(newNode);) {
             int cmp = KD_ORDER.compare(newNode, head);
             if (cmp < 0) {
-                if (head.left == null) { head.add(Direction.L, newNode); break; }
+                if (head.left == null) { head.add(Direction.L, newNode); }
                 head = head.left;
             }
-            else if (cmp > 0) {
-                if (head.right == null) { head.add(Direction.R, newNode); break; }
+            else if (cmp >= 0) {
+                if (head.right == null) { head.add(Direction.R, newNode); }
                 head = head.right;
             }
-            else {
-                if (newNode.equals(head)) {return; } // Avoid degenerates, wasteful to find with contains
-                if (head.right == null) { head.add(Direction.R, newNode); }
-                head = head.right;  // head will become newNode if it was placed, if not standard go right on equals
-            }
         }
-        N ++;
     }
 
+    // standard iterative pre-order DFS
     public boolean contains(Point2D p) {
         errorOnNull(p);
         KdNode query = new KdNode(p);
@@ -78,30 +75,37 @@ public class KdTree {
         KdNode pNode = new KdNode(p); // need to convert p to a node for compares
         Point2D minPoint = root.point;
         Stack <KdNode> nodes = new Stack<>();
-        nodes.push(root);
+        Stack <Double> dists = new Stack<>();
+        nodes.push(root); dists.push(0.0);
         while (!nodes.empty()) {
-            KdNode cur = nodes.pop();
-            double curDist = cur.point.distanceSquaredTo(p);
+            KdNode curN = nodes.pop();
+            if (minDist < dists.pop()) { continue; };
+            double curDist = curN.point.distanceSquaredTo(p);
             if (curDist < minDist) {
                 minDist = curDist;
-                minPoint = cur.point;
+                minPoint = curN.point;
             }
-            double Ldist = cur.SubtreeDistanceSquaredTo(p, Direction.L);
-            double Rdist = cur.SubtreeDistanceSquaredTo(p, Direction.R);
+            double Ldist = curN.SubtreeDistanceSquaredTo(p, Direction.L);
+            double Rdist = curN.SubtreeDistanceSquaredTo(p, Direction.R);
             // if both directions are possibilities go toward query point first
             if (Ldist < minDist && Rdist < minDist) {
-                if (KD_ORDER.compare(pNode, cur) < 0) {
-                    nodes.push(cur.right); nodes.push(cur.left); } // left top of stack
-                else { nodes.push(cur.left); nodes.push(cur.right); } // right top of stack
+                if (KD_ORDER.compare(pNode, curN) < 0) {
+                    nodes.push(curN.right); nodes.push(curN.left);
+                    dists.push(Rdist);      dists.push(Ldist);} // left node @ top of stack
+                else { nodes.push(curN.left); nodes.push(curN.right);
+                       dists.push(Ldist);     dists.push(Rdist); } // right node @ top of stack
             }
-            else if (Ldist < minDist) { nodes.push(cur.left); }
-            else if (Rdist < minDist) { nodes.push(cur.right); }
+            else if (Ldist < minDist) { nodes.push(curN.left); dists.push(Ldist); }
+            else if (Rdist < minDist) { nodes.push(curN.right); dists.push(Rdist); }
             // else we've reached a leaf || neither child node can bring you closer to query
         }
         return minPoint;
     }
 
     public void draw() { allNodes().forEach(node -> node.point.draw()); }
+
+    // prints points in tree in level order
+    private void print() { allNodes().forEach(node -> System.out.println(node.point)); }
 
     public int size() { return N; }
 
@@ -172,6 +176,7 @@ public class KdTree {
         }
 
         private void add(Direction dir, KdNode child) {
+            N++;
             if (order == Dimension.X) {
                 child.order = Dimension.Y;
                 child.Xrange = new KdRange(point.x(), Xrange, dir);
@@ -257,7 +262,7 @@ public class KdTree {
             cnt++;
         }
         System.out.printf("-> Set contained %1$d items; %2$d were found using \"contains\" method.%n", cnt,found);
-        System.out.printf("-> Input items match tree size? %b%n", tree.size()==cnt);
+        System.out.printf("-> # of input items (%1$d) match tree size (%2$d)? %3$b%n", cnt, tree.size(), tree.size()==cnt);
         StdDraw.enableDoubleBuffering();
         while (true) {  // Test nearest neighbor.
 

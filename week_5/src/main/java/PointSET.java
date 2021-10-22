@@ -6,7 +6,7 @@ import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.In;
 
 public class PointSET {
-    private static TreeSet<Point2D> points;
+    private TreeSet<Point2D> points;
 
     // construct an empty set of points
     public PointSET() {
