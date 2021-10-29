@@ -8,12 +8,12 @@ public class SAP {
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
         errorOnNull(G);
-        new ErrorOnCycle(G);
+        new DAG_Check(G);
         DAG = new Digraph(G);
 
     }
 
-    // length of shortest ancestral path between v and w; -1 if no such path
+    // length of the shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
         Integer[] vL = {v};
         Integer[] wL = {w};
@@ -27,15 +27,17 @@ public class SAP {
         return ancestor(Arrays.asList(vL), Arrays.asList(wL) );
     }
 
-    // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
+    // length of the shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        MultiBFS bfs = new MultiBFS(v,w);
-        return bfs.getLength();
+        errorOnNull(v,w);
+        MultiBFS bfs = new MultiBFS(v, w, DAG);
+        return calcDistance(bfs);
     }
 
-    // a common ancestor that participates in shortest ancestral path; -1 if no such path
+    // a common ancestor that participates in the shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        MultiBFS bfs = new MultiBFS(v,w);
+        errorOnNull(v,w);
+        MultiBFS bfs = new MultiBFS(v, w, DAG);
         return bfs.getAncestor();
     }
 
@@ -45,12 +47,69 @@ public class SAP {
         }
     }
 
-    static class ErrorOnCycle {
-        boolean[] seen;
-        Digraph G;
+    private void errorOnNull(Iterable a, Iterable b) {
+        errorOnNull(a);
+        errorOnNull(b);
+        a.forEach(this::errorOnNull);
+        b.forEach(this::errorOnNull);
+    }
 
-        ErrorOnCycle(Digraph G) {
+    private int[] ancestralPath(int v, int w) {
+        Integer[] vL = {v};
+        Integer[] wL = {w};;
+        return ancestralPath(Arrays.asList(vL), Arrays.asList(wL));
+    }
+
+    private int[] ancestralPath(Iterable<Integer> v, Iterable<Integer> w) {
+        MultiBFS bfs = new MultiBFS(v, w, DAG);
+        return showPath(bfs);
+    }
+
+    private int calcDistance(MultiBFS bfs) {
+        int ancestor = bfs.getAncestor();
+        HashMap<Integer,Integer>  aPath = bfs.getPathA();
+        HashMap<Integer,Integer> bPath = bfs.getPathB();
+        if (ancestor == -1) { return -1; }
+        int length = 0;
+        for (int nxt = ancestor; aPath.containsKey(nxt); nxt = aPath.get(nxt)) {
+            length++;
+        }
+        for (int nxt = ancestor; bPath.containsKey(nxt); nxt = bPath.get(nxt)) {
+            length++;
+        }
+        return length;
+    }
+
+    // Returns path to ancestor with A at path[0] and B at path[n-1] and ancestor somewhere between
+    // not required for assignment
+    private int[] showPath(MultiBFS BFS) {
+        int ancestor = BFS.getAncestor();
+        HashMap<Integer,Integer>  aPath = BFS.getPathA();
+        HashMap<Integer,Integer> bPath = BFS.getPathB();
+        if (ancestor == -1) {
+            throw new IllegalArgumentException("Paths do not intersect");
+        }
+        LinkedList<Integer> path = new LinkedList<>();
+        path.add(ancestor);
+        for (int cur = ancestor; aPath.containsKey(cur); path.addLast(cur)) {
+            cur = aPath.get(cur);
+        }
+        for (int cur = ancestor; bPath.containsKey(cur); path.addFirst(cur)) {
+            cur = bPath.get(cur);
+        }
+        int[] out = new int[path.size()];
+        for (int i = 0; i < out.length; i ++) { out[i] = path.removeLast(); }
+        return out;
+    }
+
+    private static class DAG_Check {
+        private boolean[] seen;
+        private Digraph G;
+        private int root;
+
+        DAG_Check(Digraph G) {
             this.G = G;
+            root = -1;
             seen = new boolean[G.V()];
             for (int i = 0; i < seen.length; i++) {
                 if (dfs(i, i)) {
@@ -64,6 +123,15 @@ public class SAP {
             if (seen[v]) {
                 return false;
             }
+            // Multi-root detection: 0 out-degree == root
+            if (G.outdegree(v) == 0 ) {
+                if (root == -1) {
+                    root = v;
+                } else if (v != root) {
+                    throw new IllegalArgumentException("Found multiple roots " + root + " & " + v);
+                }
+            }
+            // if origin point for this dfs is seen twice: cycle detected
             for (int w : G.adj(v)) {
                 if (w == origin || dfs(w, origin)) {
                     return true;
@@ -72,89 +140,6 @@ public class SAP {
             return false;
         }
     }
-
-        // Finds first intersection of 2 groups of synsets (input as a collection)
-        // Necessary b/c 1 noun can map to multiple synsets (meanings):
-        // ie "passing" maps to: 59442, 59443, 59444, 59445 , 59446
-        private class MultiBFS {
-            private int[] pathA, pathB;   // Path to common Ancestor
-            private int ancestor;
-            private int length;
-            HashMap<Integer, Integer> aPath;
-            HashMap<Integer, Integer> bPath;
-
-            public MultiBFS(Iterable<Integer> A, Iterable<Integer> B) {
-                ancestor = -1; // if no common ancestor -1
-                bfs(A, B);
-                followPath();
-            }
-
-            // Retraces BFS to find shortest path implemented for testing
-            private void tracePath() {
-
-            }
-
-            public int getAncestor() {return ancestor; }
-
-            public int getLength() {return length; }
-
-            private void followPath() {
-                if (ancestor > -1) {
-                    length = 0;
-                    for (int nxt = ancestor; aPath.containsKey(nxt); nxt = aPath.get(nxt) ) {
-                        length++; }
-                    for (int nxt = ancestor; bPath.containsKey(nxt); nxt = bPath.get(nxt) ) {
-                        length++; }
-                }
-                else { length = -1; }
-            }
-
-            private void bfs(Iterable<Integer> A, Iterable<Integer> B) {
-                LinkedList<Integer> aQ = new LinkedList<>();
-                LinkedList<Integer> bQ = new LinkedList<>();
-                HashSet<Integer> aSeen = new HashSet<>();
-                HashSet<Integer> bSeen = new HashSet<>();
-                aPath = new HashMap<>();
-                bPath = new HashMap<>();
-                A.forEach((v) -> { aQ.add(v); aSeen.add(v); } );
-                B.forEach((v) -> { bQ.add(v); bSeen.add(v); } );
-
-                while (!aQ.isEmpty() || !bQ.isEmpty()) {
-                    int size = aQ.size();
-                    for (int i = 0; i < size; i++) {
-                        int cur = aQ.pop();
-                        for (int nbr : DAG.adj(cur)) {
-                            if (aSeen.add(nbr)) {
-                                aQ.addLast(nbr);
-                                aPath.put(nbr, cur);
-                                if (bSeen.contains(nbr)) {
-                                    aQ.clear(); bQ.clear();
-                                    ancestor = nbr;
-                                    size = 0; // clean up how this exits
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    size = bQ.size();
-                    for (int i = 0; i < size; i++) {
-                        int cur = bQ.pop();
-                        for (int nbr : DAG.adj(cur)) {
-                            if (bSeen.add(nbr)) {
-                                bQ.addLast(nbr);
-                                bPath.put(nbr, cur);
-                                if (aSeen.contains(nbr)) {
-                                    aQ.clear(); bQ.clear();
-                                    ancestor = nbr;
-                                    size = 0;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
     // hypfile format: # vertices, followed by # edges, pairs of vertices, (each entry separated by whitespace)
     public static void main(String[] args) {
@@ -166,5 +151,6 @@ public class SAP {
         SAP sap = new SAP(G);
         System.out.printf("Distance from %s to %s: %8d%n", aVert, bVert,sap.length(bVert, aVert));
         System.out.printf("Closest Ancestor of %1$s and %2$s: %3$d%n", aVert, bVert,sap.ancestor(bVert, aVert));
+        System.out.printf("Path %s", Arrays.toString(sap.ancestralPath(bVert, aVert)));
     }
 }

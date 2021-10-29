@@ -13,10 +13,8 @@ public class WordNet {
     final private SAP sap;
 
     // constructor takes the name of the two input files
-    // Hypernym more general: go up graph
-    // Hyponym more specific: go down graph
-    // Hypernym: child,parent,parent...
-    // Synset: id,word,gloss (definition)
+    // Hypernyms: child id parent id
+    // Synsets: id,word,gloss (definition)
     public WordNet(String synsets, String hypernyms) {
         errorOnNull(synsets); errorOnNull(hypernyms);
         parseSynsets(synsets);
@@ -46,17 +44,17 @@ public class WordNet {
         return sap.length(idsA, idsB);
     }
 
-    // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
-    // in a shortest ancestral path
+    // a synsets (second field of synsets.txt) that is the common ancestor of nounA and nounB
+    // in the shortest ancestral path
     public String sap(String nounA, String nounB) {
         nounError(nounA, nounB);
         LinkedList<Integer> idsA = ST.get(nounA);
         LinkedList<Integer> idsB = ST.get(nounB);
-        int papa = sap.ancestor(idsA, idsB);
-        if (papa == -1) {
+        int ancestor = sap.ancestor(idsA, idsB);
+        if (ancestor == -1) {
             return String.format("%s and %s are not connected.", nounA, nounB);
         }
-        return keys.get(papa);
+        return keys.get(ancestor);
     }
 
     // Input csv: id,word,gloss (gloss is unused)
@@ -69,7 +67,7 @@ public class WordNet {
             } // implement multiple root detection here
             int i = Integer.parseInt(line[0]);
             if (keys.size() != i) {
-                throw new IllegalArgumentException("Found a Key : ID mismatch in synset input file at line: " + keys.size());
+                throw new IllegalArgumentException("Found a Key : ID mismatch in synsets input file at line: " + keys.size());
             }
             String[] ks = line[1].split(" ");
             keys.add(ks[0]);
@@ -104,7 +102,7 @@ public class WordNet {
     private void nounError(String a, String b) {
         errorOnNull(a); errorOnNull(b);
         if (!isNoun(a) || !isNoun(b)) {
-            throw new IllegalArgumentException("Recieved a noun input which is not in the WordNet.");
+            throw new IllegalArgumentException("Received a noun input which is not in the WordNet.");
         }
     }
 
@@ -116,18 +114,15 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        if (args.length != 2) { throw new IllegalArgumentException("main: received in improper number of arguments." +
-                "Usage: Wordnet synsetsFile.txt hypernymsFile.txt"); }
+        if (args.length != 4) { throw new IllegalArgumentException("main: received in improper number of arguments." +
+                "Usage: Wordnet synsetsFile.txt hypernymsFile.txt nounA nounB"); }
         String synsets = args[0];
         String hypernyms = args[1];
         WordNet WN = new WordNet(synsets, hypernyms);
         //WN.nouns().forEach(System.out::println);
-        //String noun1 = "horse";
-        String noun1 = "horse Equus_caballus";
-        //String noun2 = "lion";
-        String noun2 = "lion king_of_beasts Panthera_leo";
-        System.out.printf("Mutual parent of %1$s and %2$s: %3$s.%n", noun1, noun2, WN.sap(noun1, noun2)  );
-        System.out.printf( "Distance between %1$s and %2$s: %3$s,%n", noun1, noun2, WN.distance(noun1, noun2) ) ;
-
+        String nounA = args[2];
+        String nounB = args[3];
+        System.out.printf("Mutual parent of %1$s and %2$s: %3$s.%n", nounA, nounB, WN.sap(nounA, nounB)  );
+        System.out.printf( "Distance between %1$s and %2$s: %3$s,%n", nounA, nounB, WN.distance(nounA, nounB) ) ;
     }
 }

@@ -19,7 +19,6 @@ sourceSets {
             // * **** USAGE ****
             // * exclude "**/Someclass.java"
             // * include "**/SomeClass.java"
-            exclude "**/WordNet.java"
         }
     }
 }
