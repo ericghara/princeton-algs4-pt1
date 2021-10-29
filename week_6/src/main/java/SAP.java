@@ -9,7 +9,7 @@ public class SAP {
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
         errorOnNull(G);
-        new DAG_Check(G);
+        //new DAG_Check(G);
         DAG = new Digraph(G);
 
     }
@@ -88,7 +88,7 @@ public class SAP {
         HashMap<Integer,Integer>  aPath = BFS.getPathA();
         HashMap<Integer,Integer> bPath = BFS.getPathB();
         if (ancestor == -1) {
-            throw new IllegalArgumentException("Paths do not intersect");
+            System.out.println("Paths do not intersect");
         }
         LinkedList<Integer> path = new LinkedList<>();
         path.add(ancestor);
@@ -107,39 +107,29 @@ public class SAP {
         private final boolean[] seen;
         private final Digraph G;
         private int root;
+        private boolean hasCycle = false;
 
         DAG_Check(Digraph G) {
             this.G = G;
             root = -1;
             seen = new boolean[G.V()];
-            for (int i = 0; i < seen.length; i++) {
-                if (dfs(i, i)) {
-                    throw new IllegalArgumentException("Cycle found: Digraph is not a DAG.");
+            for (int v = 0; v < G.V(); v++) {
+                if (!seen[v]) {
+                    dfs(v, v);
                 }
             }
         }
 
-        // returns true if a cycle is detected
-        boolean dfs(int v, int origin) {
-            if (seen[v]) {
-                return false;
-            }
+        // Just marks all vertices
+        private void dfs(int v, int origin) {
             seen[v] = true;
-            // Multi-root detection: 0 out-degree == root
-            if (G.outdegree(v) == 0 ) {
-                if (root == -1) {
-                    root = v;
-                } else if (v != root) {
-                    throw new IllegalArgumentException("Found multiple roots " + root + " & " + v);
-                }
-            }
-            // if origin point for this dfs is seen twice: cycle detected
             for (int w : G.adj(v)) {
-                if (w == origin || dfs(w, origin)) {
-                    return true;
+                if (!seen[w]) {
+                    dfs(w, v);
+                } else if (w != origin) {
+                    hasCycle = true;
                 }
             }
-            return false;
         }
     }
 

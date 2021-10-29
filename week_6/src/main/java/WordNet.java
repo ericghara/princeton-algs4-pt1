@@ -8,9 +8,9 @@ import java.util.Arrays;
 public class WordNet {
 
     private final HashMap<String,LinkedList<Integer> > ST = new HashMap<>();
-    final private ArrayList<String> keys = new ArrayList<>();
-    final private Digraph G;
-    final private SAP sap;
+    private final  ArrayList<String> keys = new ArrayList<>();
+    private final  Digraph G;
+    private final SAP sap;
 
     // constructor takes the name of the two input files
     // Hypernyms: child id parent id
