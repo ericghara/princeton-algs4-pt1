@@ -1,7 +1,8 @@
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class SAP {
     private final Digraph DAG;
@@ -47,7 +48,7 @@ public class SAP {
         }
     }
 
-    private void errorOnNull(Iterable a, Iterable b) {
+    private void errorOnNull(Iterable<Integer> a, Iterable<Integer> b) {
         errorOnNull(a);
         errorOnNull(b);
         a.forEach(this::errorOnNull);
@@ -56,7 +57,7 @@ public class SAP {
 
     private int[] ancestralPath(int v, int w) {
         Integer[] vL = {v};
-        Integer[] wL = {w};;
+        Integer[] wL = {w};
         return ancestralPath(Arrays.asList(vL), Arrays.asList(wL));
     }
 
@@ -103,8 +104,8 @@ public class SAP {
     }
 
     private static class DAG_Check {
-        private boolean[] seen;
-        private Digraph G;
+        private final boolean[] seen;
+        private final Digraph G;
         private int root;
 
         DAG_Check(Digraph G) {
@@ -123,6 +124,7 @@ public class SAP {
             if (seen[v]) {
                 return false;
             }
+            seen[v] = true;
             // Multi-root detection: 0 out-degree == root
             if (G.outdegree(v) == 0 ) {
                 if (root == -1) {

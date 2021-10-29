@@ -73,4 +73,8 @@ public class MultiBFS {
     public HashMap<Integer,Integer> getPathA() { return aPath; }
 
     public HashMap<Integer,Integer> getPathB() { return bPath; }
+
+    public static void main(String[] args) {
+        System.out.println("Unit test through SAP class");
+    }
 }
