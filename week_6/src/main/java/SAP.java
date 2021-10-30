@@ -46,7 +46,7 @@ public class SAP {
         }
     }
 
-    private void errorOnInvalid(int v) {
+    private void errorOnInvalid(Integer v) {
         errorOnNull(v);
         if (0 > v || v >= G.V()) {
             throw new IllegalArgumentException("Received a vertex that is not in the graph");

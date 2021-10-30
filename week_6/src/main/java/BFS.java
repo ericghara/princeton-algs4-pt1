@@ -21,12 +21,17 @@ public class BFS {
         });
     }
     public void sync(BFS other) {
-        HashSet<Integer> small = this.seen;
-        HashSet<Integer> large = other.seen;
+        HashSet<Integer> large, small;
+        otherSeen = other.seen;
+        other.otherSeen = seen;
         // Check intersections, using the smallest set (faster)
-        if (small.size() > large.size()) {
-            small = other.seen;
-            large = this.seen;
+        if (otherSeen.size() > seen.size()) {
+            small = seen;
+            large = otherSeen;
+        }
+        else {
+            large = otherSeen;
+            small = seen;
         }
         for (int k : small) {
             if (large.contains(k)) {
