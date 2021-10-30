@@ -8,71 +8,95 @@ import java.util.LinkedList;
 // ie "passing" maps to: 59442, 59443, 59444, 59445 , 59446
 public class MultiBFS {
 
-    private HashMap<Integer, Integer> aPath, bPath;
-    private int ancestor;
-    private final Digraph DAG;
+    private final HashSet<Integer> ancestors;
+    private final Digraph G;
+    private final BFS A, B;
+    private int minAncestor, minLength;
 
-    public MultiBFS(Iterable<Integer> A, Iterable<Integer> B, Digraph DAG) {
-        this.DAG = DAG;
-        ancestor = -1; // if no common ancestor -1
-        bfsMaster(A, B);
+    public MultiBFS(Iterable<Integer> nodesA, Iterable<Integer> nodesB, Digraph G) {
+        this.G = G;
+        ancestors = new HashSet<>();
+        A = new BFS(G,nodesA, ancestors);
+        B = new BFS(G, nodesB, ancestors);
+        A.sync(B);
+        bfsBoss();
+        calcLength();
     }
 
-    private int bfsWorker(LinkedList<Integer> Q, HashSet<Integer> seen, HashSet<Integer> otherSeen, HashMap<Integer, Integer> path) {
-        int size = Q.size();
-        for (int i = 0; i < size; i++) {
-            int cur = Q.pop();
-            for (int nbr : DAG.adj(cur)) {
-                if (seen.add(nbr)) {
-                    Q.addLast(nbr);
-                    path.put(nbr, cur);
-                    if (otherSeen.contains(nbr)) {
-                        ancestor = nbr;
-                        return -1;
-                    }
-                }
-            }
-        }
-        return Q.size();
-    }
+    public int getMinLength() { return minLength; }
 
-    private void bfsMaster(Iterable<Integer> A, Iterable<Integer> B) {
-        LinkedList<Integer> aQ = new LinkedList<>();
-        LinkedList<Integer> bQ = new LinkedList<>();
-        HashSet<Integer> aSeen = new HashSet<>();
-        HashSet<Integer> bSeen = new HashSet<>();
-        aPath = new HashMap<>();
-        bPath = new HashMap<>();
-        A.forEach((v) -> {
-            aQ.add(v);
-            aSeen.add(v);
-        });
-        B.forEach((v) -> {
-            // Make sure starting sets don't already intersect
-            if (aSeen.contains(v)) {
-                ancestor = v;
-                return;
-            }
-            bQ.add(v);
-            bSeen.add(v);
-        });
+    public int getMinAncestor() { return minAncestor; }
+
+    private void bfsBoss() {
+        if (!ancestors.isEmpty()) { return; } // Starting sets intersect
         double aSize = 1;
         double bSize = 1;
-        // Keep running as long as either has a queue and neither has
-        // broken loop by finding an ancestor (sentinel value is -1)
-        while ( aSize > 0 || bSize > 0 && ancestor < 0 ) {
-            aSize = bfsWorker(aQ, aSeen, bSeen, aPath);
-            // skips B if A already found ancestor
-            if (ancestor < 0) bSize = bfsWorker(bQ, bSeen, aSeen, bPath);
+        int dir = 1;
+        int cnt = 0;
+
+        /* Keeps running as long as either has a queue, counts up before first ancestor is detected,
+        *  then counts down.  This is because first detected ancestor is not necessarily the shortest path
+        *  ex. A--x--B @ step: 3, length: 5; A--->B--->  @ step 4, length 4
+        *  these examples represent lower and higher bounds for # of dfs steps (n-1 steps after first encounter) */
+
+        while ( aSize > 0 || bSize > 0  && cnt >= 0 ) {
+            if (!ancestors.isEmpty() && dir == 1) {
+                dir = -1;
+                cnt += dir; // (n-1) steps after first encounter
+            }
+            else { cnt += dir; }
+            aSize = A.step();
+            bSize = B.step();
         }
     }
 
+    private void calcLength() {
+        HashMap<Integer,Integer>  aPath = A.path;
+        HashMap<Integer,Integer> bPath = B.path;
+        if (ancestors.isEmpty()) {
+            minAncestor = minLength = -1;
+            return;
+        }
+        int minLen = ~(-1<<31);
+        int minAnc = -1;
+        for (int a : ancestors) {
+            int len = 0;
+            for (int nxt = a; aPath.containsKey(nxt); nxt = aPath.get(nxt)) {
+                len++;
+            }
+            for (int nxt = a; bPath.containsKey(nxt); nxt = bPath.get(nxt)) {
+                len++;
+            }
+            if (len < minLen) {
+                minLen = len;
+                minAnc = a;
+            }
+        }
+        minAncestor = minAnc;
+        minLength = minLen;
+    }
 
-    public int getAncestor() { return ancestor; }
+    // Returns path to ancestor with A at path[0] and B at path[n-1] and ancestor somewhere between
+    // not required for assignment
+    public int[] showPath() {
+        HashMap<Integer,Integer>  aPath = A.path;
+        HashMap<Integer,Integer> bPath = B.path;
+        if (minAncestor == -1) {
+            System.out.println("Paths do not intersect");
+        }
+        LinkedList<Integer> path = new LinkedList<>();
+        path.add(minAncestor);
+        for (int cur = minAncestor; aPath.containsKey(cur); path.addLast(cur)) {
+            cur = aPath.get(cur);
+        }
+        for (int cur = minAncestor; bPath.containsKey(cur); path.addFirst(cur)) {
+            cur = bPath.get(cur);
+        }
+        int[] out = new int[path.size()];
+        for (int i = 0; i < out.length; i ++) { out[i] = path.removeLast(); }
+        return out;
+    }
 
-    public HashMap<Integer,Integer> getPathA() { return aPath; }
-
-    public HashMap<Integer,Integer> getPathB() { return bPath; }
 
     public static void main(String[] args) {
         System.out.println("Unit test through SAP class");

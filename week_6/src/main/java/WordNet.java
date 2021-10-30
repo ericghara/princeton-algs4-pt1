@@ -69,8 +69,8 @@ public class WordNet {
             if (keys.size() != i) {
                 throw new IllegalArgumentException("Found a Key : ID mismatch in synsets input file at line: " + keys.size());
             }
+            keys.add(line[1]);
             String[] ks = line[1].split(" ");
-            keys.add(ks[0]);
             for (String k : ks) {
                 LinkedList<Integer> vals;
                 if (ST.containsKey(k)) {

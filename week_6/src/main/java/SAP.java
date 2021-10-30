@@ -1,16 +1,14 @@
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 public class SAP {
-    private final Digraph DAG;
+    private final Digraph G;
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
         errorOnNull(G);
         //new DAG_Check(G);
-        DAG = new Digraph(G);
+        this.G = new Digraph(G);
 
     }
 
@@ -30,16 +28,16 @@ public class SAP {
 
     // length of the shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        errorOnNull(v,w);
-        MultiBFS bfs = new MultiBFS(v, w, DAG);
-        return calcDistance(bfs);
+        errorOnInvalid(v,w);
+        MultiBFS mBFS = new MultiBFS(v, w, G);
+        return mBFS.getMinLength();
     }
 
     // a common ancestor that participates in the shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        errorOnNull(v,w);
-        MultiBFS bfs = new MultiBFS(v, w, DAG);
-        return bfs.getAncestor();
+        errorOnInvalid(v,w);
+        MultiBFS mBfs = new MultiBFS(v, w, G);
+        return mBfs.getMinAncestor();
     }
 
     private void errorOnNull(Object obj) {
@@ -48,11 +46,18 @@ public class SAP {
         }
     }
 
-    private void errorOnNull(Iterable<Integer> a, Iterable<Integer> b) {
+    private void errorOnInvalid(int v) {
+        errorOnNull(v);
+        if (0 > v || v >= G.V()) {
+            throw new IllegalArgumentException("Received a vertex that is not in the graph");
+        }
+    }
+
+    private void errorOnInvalid(Iterable<Integer> a, Iterable<Integer> b) {
         errorOnNull(a);
         errorOnNull(b);
-        a.forEach(this::errorOnNull);
-        b.forEach(this::errorOnNull);
+        a.forEach(this::errorOnInvalid);
+        b.forEach(this::errorOnInvalid);
     }
 
     private int[] ancestralPath(int v, int w) {
@@ -62,75 +67,8 @@ public class SAP {
     }
 
     private int[] ancestralPath(Iterable<Integer> v, Iterable<Integer> w) {
-        MultiBFS bfs = new MultiBFS(v, w, DAG);
-        return showPath(bfs);
-    }
-
-    private int calcDistance(MultiBFS bfs) {
-        int ancestor = bfs.getAncestor();
-        HashMap<Integer,Integer>  aPath = bfs.getPathA();
-        HashMap<Integer,Integer> bPath = bfs.getPathB();
-        if (ancestor == -1) { return -1; }
-        int length = 0;
-        for (int nxt = ancestor; aPath.containsKey(nxt); nxt = aPath.get(nxt)) {
-            length++;
-        }
-        for (int nxt = ancestor; bPath.containsKey(nxt); nxt = bPath.get(nxt)) {
-            length++;
-        }
-        return length;
-    }
-
-    // Returns path to ancestor with A at path[0] and B at path[n-1] and ancestor somewhere between
-    // not required for assignment
-    private int[] showPath(MultiBFS BFS) {
-        int ancestor = BFS.getAncestor();
-        HashMap<Integer,Integer>  aPath = BFS.getPathA();
-        HashMap<Integer,Integer> bPath = BFS.getPathB();
-        if (ancestor == -1) {
-            System.out.println("Paths do not intersect");
-        }
-        LinkedList<Integer> path = new LinkedList<>();
-        path.add(ancestor);
-        for (int cur = ancestor; aPath.containsKey(cur); path.addLast(cur)) {
-            cur = aPath.get(cur);
-        }
-        for (int cur = ancestor; bPath.containsKey(cur); path.addFirst(cur)) {
-            cur = bPath.get(cur);
-        }
-        int[] out = new int[path.size()];
-        for (int i = 0; i < out.length; i ++) { out[i] = path.removeLast(); }
-        return out;
-    }
-
-    private static class DAG_Check {
-        private final boolean[] seen;
-        private final Digraph G;
-        private int root;
-        private boolean hasCycle = false;
-
-        DAG_Check(Digraph G) {
-            this.G = G;
-            root = -1;
-            seen = new boolean[G.V()];
-            for (int v = 0; v < G.V(); v++) {
-                if (!seen[v]) {
-                    dfs(v, v);
-                }
-            }
-        }
-
-        // Just marks all vertices
-        private void dfs(int v, int origin) {
-            seen[v] = true;
-            for (int w : G.adj(v)) {
-                if (!seen[w]) {
-                    dfs(w, v);
-                } else if (w != origin) {
-                    hasCycle = true;
-                }
-            }
-        }
+        MultiBFS mBFS = new MultiBFS(v, w, G);
+        return mBFS.showPath();
     }
 
     // hypfile format: # vertices, followed by # edges, pairs of vertices, (each entry separated by whitespace)
