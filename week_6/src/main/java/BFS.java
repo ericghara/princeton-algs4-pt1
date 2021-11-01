@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+// Designed to be controlled by MultiBFS but technically could be used in other cases
+// To find path (if any) from one set of points to another set
 public class BFS {
     private Digraph G;
     private LinkedList<Integer> Q;
@@ -20,6 +22,8 @@ public class BFS {
             seen.add(v);
         });
     }
+
+    // Connect with another BFS object, allows sharing of seen hashset
     public void sync(BFS other) {
         HashSet<Integer> large, small;
         otherSeen = other.seen;
@@ -41,6 +45,7 @@ public class BFS {
             }
         }
 
+    // Each BFS originating from all the input start nodes takes a step forward
     public int step() {
         int size = Q.size();
         for (int i = 0; i < size; i++) {

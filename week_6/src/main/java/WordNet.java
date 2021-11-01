@@ -12,9 +12,9 @@ public class WordNet {
     private final  Digraph G;
     private final SAP sap;
 
-    // constructor takes the name of the two input files
-    // Hypernyms: child id parent id
-    // Synsets: id,word,gloss (definition)
+    /* Input file format
+    * Hypernyms: child id parent id
+    * Synsets: id,word,gloss (definition) */
     public WordNet(String synsets, String hypernyms) {
         errorOnNull(synsets); errorOnNull(hypernyms);
         parseSynsets(synsets);
@@ -36,7 +36,7 @@ public class WordNet {
         return ST.containsKey(word);
     }
 
-    // distance between nounA and nounB (defined below)
+    // distance between nounA and nounB
     public int distance(String nounA, String nounB) {
         nounError(nounA, nounB);
         LinkedList <Integer> idsA = ST.get(nounA);
@@ -86,6 +86,8 @@ public class WordNet {
         keys.trimToSize();
     }
 
+    // Format csv: v,w
+    // where v -> w ( v outdegree ++, w indegree ++ )
     private void parseHypernyms (String file) {
         // Parse hypernyms
         In hypFile = new In(file);
@@ -112,7 +114,7 @@ public class WordNet {
         }
     }
 
-    // do unit testing of this class
+    // do unit testing of this class (see usage error below for input format)
     public static void main(String[] args) {
         if (args.length != 4) { throw new IllegalArgumentException("main: received in improper number of arguments." +
                 "Usage: Wordnet synsetsFile.txt hypernymsFile.txt nounA nounB"); }

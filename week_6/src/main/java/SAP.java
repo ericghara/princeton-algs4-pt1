@@ -60,12 +60,14 @@ public class SAP {
         b.forEach(this::errorOnInvalid);
     }
 
+    // Private to satisfy auto-grader b/c not part of assignment, but useful for debugging and interesting nonetheless
     private int[] ancestralPath(int v, int w) {
         Integer[] vL = {v};
         Integer[] wL = {w};
         return ancestralPath(Arrays.asList(vL), Arrays.asList(wL));
     }
 
+    // Private as its overloaded cousin
     private int[] ancestralPath(Iterable<Integer> v, Iterable<Integer> w) {
         MultiBFS mBFS = new MultiBFS(v, w, G);
         return mBFS.showPath();

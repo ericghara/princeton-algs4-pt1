@@ -6,6 +6,7 @@ import java.util.LinkedList;
 // Finds first intersection of 2 groups of synsets (input as a collection)
 // Necessary b/c 1 noun can map to multiple synsets (meanings):
 // ie "passing" maps to: 59442, 59443, 59444, 59445 , 59446
+// Two parallel BFSs are run from each group of points (parallel b/c we're working with a digraph)
 public class MultiBFS {
 
     private final HashSet<Integer> ancestors;
@@ -50,6 +51,8 @@ public class MultiBFS {
         }
     }
 
+    // Runs DFS from all found intersections to determine path length, cannot be inferred during BFS because
+    // Two parallel BFS's were run, see notes in bfsBoss method.
     private void calcLength() {
         HashMap<Integer,Integer>  aPath = A.path;
         HashMap<Integer,Integer> bPath = B.path;
