@@ -1,0 +1,97 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            // * include or exclude sources in build
+            // * **** USAGE ****
+            // * exclude "**/Someclass.java"
+            // * include "**/SomeClass.java"
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    ivy {
+        url 'https://algs4.cs.princeton.edu/code/'
+
+        patternLayout {
+            artifact '[module].jar'
+        }
+
+        // This is required in Gradle 6.0+ as metadata file (ivy.xml)
+        metadataSources { artifact() }
+    }
+
+}
+
+compileJava {
+    dependsOn "DownloadSrc"
+    finalizedBy "srcZip"
+}
+
+dependencies {
+    implementation group: 'edu.princeton.cs', name: 'algs4', version: '1.0.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+application {
+    // usage example: gradle run -PmainClass=XYZ --args=ARGS --info
+    setMainClass(project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task srcZip(type: Zip) {
+    //Zips all files in src's child directories.
+    //find zip in distributions folder
+    // exclude this.java
+    // include that.java
+    exclude 'PrintEnergy.java', 'PrintSeams.java', 'ResizeDemo.java', 'SCUtility.java', 'ShowEnergy.java', 'ShowSeams.java'
+    archiveFileName = "seam.zip"
+    archiveClassifier = 'src'
+    from sourceSets*.allSource
+}
+
+task DownloadSrc (type: Download) {
+    def inDir = 'https://coursera.cs.princeton.edu/algs4/assignments/seam/files/'
+    def outDir = "src/main/java/"
+    def names = ['PrintEnergy.java', 'PrintSeams.java', 'ResizeDemo.java', 'SCUtility.java', 'ShowEnergy.java', 'ShowSeams.java']
+    inFiles = []
+    outFiles = []
+    for (f in names) {
+        outFiles.add(file(outDir + f))
+        inFiles.add(inDir + f)
+    }
+}
+
+class Download extends DefaultTask {
+    @Input
+            inFiles
+
+    @OutputFiles
+            outFiles
+
+    @TaskAction
+    void download() {
+        for(int i = 0; i < inFiles.size(); i++ ) {
+            ant.get(src: inFiles[i], dest: outFiles[i])
+        }
+    }
+}
