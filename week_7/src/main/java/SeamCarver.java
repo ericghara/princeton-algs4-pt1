@@ -1,21 +1,24 @@
-import java.awt.Color;
 import edu.princeton.cs.algs4.Picture;
 import java.lang.Math;
 
 public class SeamCarver {
     private Picture pic;
     private int W, H;
+    private PixMap pixMap;
+    private Energies energies;
+    private enum Direction {V,H};
     // create a seam carver object based on the given picture
-    public SeamCarver(Picture picture) {
-        pic = new Picture(picture);
+    public SeamCarver(Picture pic) {
+        validatePic(pic);
+        this.pic = new Picture(pic);  // Picture constructor performs a defensive copy
         W = pic.width();
         H = pic.height();
-        double[][] energies = allEnergies();
-        VertexWeightedSP SP = new VertexWeightedSP( energies, VertexWeightedSP.Dimension.X ); // remove me
+        pixMap = new PixMap(this.pic);
+        energies = new Energies(pixMap);
     }
 
     // current picture
-    public Picture picture() { return new Picture(pic); }
+    public Picture picture() { return pixMap.toPicture(); }
 
     // width of current picture
     public int width() { return W; }
@@ -23,49 +26,63 @@ public class SeamCarver {
     // height of current picture
     public int height() { return H; }
 
-    // energy of pixel at column x and row y
-    public double energy(int x, int y) {
-        // We define the energy of a pixel at the border of the image to be 1000, so that it is strictly larger than the energy of any interior pixel.
-        checkPixel(x,y);
-        if (x == 0 || x == W-1 || y == 0 || y == H-1) {
-            return 1000;
-        }
-        /* For other pixels performs following operation with r,g,b representing r,g,b channels of picture
-        *  sqrt((255-r)^2 + (255-g)^2 + (255-b)^2)  */
-        int encRGB = pic.getRGB(x,y);
-        double energySquared = 0;
-        for (int i = 0; i < 3; i++) {
-            energySquared += Math.pow(255 - (encRGB & 0xFF), 2);
-            encRGB >>= 8;
-        }
-        return Math.sqrt(energySquared);
-    }
+
 
     // sequence of indices for horizontal seam
-    public int[] findHorizontalSeam() {}
+    public int[] findHorizontalSeam() { return energies.getHorizontalSP(); }
 
     // sequence of indices for vertical seam
-    public int[] findVerticalSeam() {}
+    public int[] findVerticalSeam() { return energies.getVerticalSP(); }
 
     // remove horizontal seam from current picture
-    public void removeHorizontalSeam(int[] seam) {}
+    public void removeHorizontalSeam(int[] seam) {
+        if (H <= 1) {
+            throw new IllegalArgumentException("Cannot remove seam, height <= 1.");
+        }
+        validateSeam(seam, Direction.H);
+        pixMap.removeHorizontalSeam(seam);
+        energies.removeHorizontalSeam(seam);
+    }
 
     // remove vertical seam from current picture
-    public void removeVerticalSeam(int[] seam) {}
+    public void removeVerticalSeam(int[] seam) {
+        validateSeam(seam, Direction.V);
+        pixMap.removeVerticalSeam(seam);
+        energies.removeHorizontalSeam(seam);
+    }
 
-    private double[][] allEnergies() {
-        double[][] energies = new double[H][W];
-        for (int x = 0; x < W; x++ ) {
-            for (int y = 0; y < W; y++) {
-                energies[x][y] = energy(x,y);
-            }
-        }
-        return energies;
+    public double energy(int x, int y) {
+        return energies.getEnergy(x,y);
     }
 
     private void checkPixel(int x, int y) {
         if ( 0 < x || x >= W || 0 < y || y >= H) {
             throw new IllegalArgumentException("Pixel coordinates invalid: (" + x + ", " + y + ")." );
+        }
+    }
+
+    private void validatePic(Picture pic) {
+        if (pic == null || pic.height() < 1 || pic.width() < 1) {
+            throw new IllegalArgumentException("Received an invalid input picture.");
+        }
+    }
+
+    private void validateSeam(int[] seam, Direction dir) {
+        int onAxisSize = (dir == Direction.H) ? H : W;
+        int offAxisSize = (dir == Direction.H) ? W : H;
+
+        if (offAxisSize <= 1) {
+            throw new IllegalArgumentException("Picture is too small to remove another seam");
+        }
+        if (seam == null || seam.length != onAxisSize) {
+            throw new IllegalArgumentException("Invalid seam length.");
+        }
+        int lastVal = seam[0];
+        for (int val : seam) {
+            if (val < 0 || val >= offAxisSize || val < lastVal-1 || val > lastVal+1 ) {
+                throw new IllegalArgumentException("Found an invalid coordinate in the seam.");
+            }
+            lastVal = val;
         }
     }
 
