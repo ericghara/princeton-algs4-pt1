@@ -19,3 +19,4 @@ gradle-app.setting
 *.class
 *.iml
 
+/week_7/src/test/resources/

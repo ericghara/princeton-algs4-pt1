@@ -5,14 +5,18 @@ public class VertexWeightedSP {
     private final double[][] weightTo;
     private final int[][] lastVert;
     private static int W, H;
-    private WeightMatrixInterface wMatrix;
-    public static interface WeightMatrixInterface {
-        double getWeight(int x, int y);
+    private final MatrixInterface wMatrix;
+
+    public interface MatrixInterface {
+
+        double get(int x, int y);
+
         int height();
+
         int width();
     }
 
-    public VertexWeightedSP(WeightMatrixInterface wMatrix) {
+    public VertexWeightedSP(MatrixInterface wMatrix) {
         this.wMatrix = wMatrix;
         W = wMatrix.width();
         H = wMatrix.height();
@@ -24,12 +28,12 @@ public class VertexWeightedSP {
     // finds tail of min weight path and returns its y coordinate;
     // x coordinate is implicitly last column.
     private int findTail() {
-        final int X = W-1;
+        final int END_X = W-1;
         double minWt = Double.POSITIVE_INFINITY;
         int minY = -1;
         for (int y = 0; y < H; y++) {
-            if (minWt > weightTo[X][y]) {
-                minWt = weightTo[X][y];
+            if (minWt > weightTo[END_X][y]) {
+                minWt = weightTo[END_X][y];
                 minY = y;
             }
         }
@@ -54,9 +58,9 @@ public class VertexWeightedSP {
         // there are no possible moves from the last column.
         for (int fromX = 0; fromX < W-1; fromX++) {
             for (int fromY = 0; fromY < H; fromY++) {
+                double fromWeight = weightTo[fromX][fromY];
                 int toX = fromX + 1;
                 for (int toY: adj(fromY)) {
-                    double fromWeight = weightTo[fromX][fromY];
                     relax(fromY, fromWeight, toX, toY);
                 }
             }
@@ -81,7 +85,7 @@ public class VertexWeightedSP {
     /* "from" requires only y component x component can be inferred by position
      *  in lastVert matrix.  This ~halves space required by lastVert */
     private void relax(int fromY, double fromWeight, int toX, int toY) {
-        double pathWeight = fromWeight + wMatrix.getWeight(toX, toY);
+        double pathWeight = fromWeight + wMatrix.get(toX, toY);
         if (pathWeight  < weightTo[toX][toY]) {
             weightTo[toX][toY] = pathWeight;
             lastVert[toX][toY] = fromY;
@@ -109,5 +113,4 @@ public class VertexWeightedSP {
         }
         return lastVert;
     }
-
 }
