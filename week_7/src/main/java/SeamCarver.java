@@ -13,7 +13,7 @@ public class SeamCarver {
         this.pic = new Picture(pic);  // Picture constructor performs a defensive copy
         W = pic.width();
         H = pic.height();
-        pixMap = new PixMap(this.pic);
+        //pixMap = new PixMap(this.pic);
         energies = new Energies(pixMap);
     }
 

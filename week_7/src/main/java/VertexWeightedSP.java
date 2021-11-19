@@ -1,6 +1,7 @@
 
 // Finds the lowest weight path from left to right in a matrix
 public class VertexWeightedSP {
+
     private final double[][] weightTo;
     private final int[][] lastVert;
     private static int W, H;
@@ -17,8 +18,7 @@ public class VertexWeightedSP {
         H = wMatrix.height();
         weightTo = createWeightTo();
         lastVert = createLastVert();
-
-
+        calcPath();
     }
 
     // finds tail of min weight path and returns its y coordinate;
@@ -49,16 +49,6 @@ public class VertexWeightedSP {
         return path;
     }
 
-    /* "from" requires only y component x component can be inferred by position
-     *  in lastVert matrix.  This ~halves space required by lastVert */
-    private void relax(int fromY, double fromWeight, int toX, int toY) {
-        double pathWeight = fromWeight + wMatrix.getWeight(toX, toY);
-        if (pathWeight  < weightTo[toX][toY]) {
-            weightTo[toX][toY] = pathWeight;
-            lastVert[toX][toY] = fromY;
-        }
-    }
-
     private void calcPath() {
         // Stops at 2nd to last column because this looks at the next possible move from current;
         // there are no possible moves from the last column.
@@ -76,7 +66,7 @@ public class VertexWeightedSP {
     // Provides y-1, y, y+1 (if available) from given y
     private int[] adj(int y) {
         if (y < 0 || y >= H) {
-            throw new IllegalArgumentException("Adj got an out of range y value.");
+            throw new IllegalArgumentException("Adj received an out of range y value.");
         }
         int loY = (y == 0) ? y : y-1;
         int hiY =  (y == H-1) ? y: y + 1;
@@ -86,6 +76,16 @@ public class VertexWeightedSP {
             adj[i] = loY + i;
         }
         return adj;
+    }
+
+    /* "from" requires only y component x component can be inferred by position
+     *  in lastVert matrix.  This ~halves space required by lastVert */
+    private void relax(int fromY, double fromWeight, int toX, int toY) {
+        double pathWeight = fromWeight + wMatrix.getWeight(toX, toY);
+        if (pathWeight  < weightTo[toX][toY]) {
+            weightTo[toX][toY] = pathWeight;
+            lastVert[toX][toY] = fromY;
+        }
     }
 
     // Creates array with origin column (column: 0) set to 0 and all others to inf.

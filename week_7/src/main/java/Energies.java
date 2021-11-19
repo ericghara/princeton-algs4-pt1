@@ -7,8 +7,8 @@ public class Energies {
 
     public Energies(PixMap pixMap) {
         this.pixMap = pixMap;
-        W = pixMap.getW();
-        H = pixMap.getH();
+        W = pixMap.width();
+        H = pixMap.height();
         energies = createEnergies();
     }
 
@@ -45,7 +45,7 @@ public class Energies {
             p1 >>= 8;
             p2 >>= 8;
         }
-        // avoiding multiple boxing/unboxing by working with sum as an int until the very end
+        // avoids multiple widening conversions, working with ints until very end
         return (double) sum;
     }
 
@@ -60,7 +60,7 @@ public class Energies {
     }
 
     public int[] getVerticalSP() {
-        VertexWeightedSP SP = new VertexWeightedSP( new Trans() );
+        VertexWeightedSP SP = new VertexWeightedSP( new Transposed() );
         return SP.shortestPath();
     }
 
@@ -88,9 +88,9 @@ public class Energies {
         }
     }
 
-    // use for vertical shortest paths; provides client accesses energies
-    // as a transpose matrix
-    public static class Trans implements VertexWeightedSP.WeightMatrixInterface {
+    // use for vertical shortest paths; provides client access to energies
+    // as a transposed matrix
+    public static class Transposed implements VertexWeightedSP.WeightMatrixInterface {
         public double getWeight(int x, int y) {
             return energies[y][x];  // notice transposed
         }

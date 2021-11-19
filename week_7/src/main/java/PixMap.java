@@ -22,12 +22,36 @@ public class PixMap {
     }
 
     public void removeVerticalSeam(int[] seam) {
-
+        // seam is x vals
+        // (mostly) in place eager delete, extra space = W
+        for (int y = 0; y < H; y++) {
+            int x = seam[y];
+            map[x][y] = -1; // mark for deletion
+        }
+        /* Fills in holes of pixels marked for deletion by moving pixels directly to the right into holes.
+        *  After a move, pixel to the right now becomes a hole.  Process repeats until entire rightmost column
+        *  is holes (and can be deleted) */
+        for (int x = 0; x < W-1; x++) {
+            for (int y = 0; y < W; y++) {
+                if (map[x][y] == -1) {
+                    map[x][y] = map[x+1][y]; // move pixel left
+                    map[x+1][y] = -1; // mark hole to be filled
+                }
+            }
+        }
+        System.arraycopy(map, 0, map, 0, --W);  // decreases width of map array by 1
     }
 
     public void removeHorizontalSeam(int [] seam) {
-
-
+        // seam is y vals
+        // (mostly) in place eager delete, extra space = H
+        H--;
+        for (int x = 0; x < W; x++) {
+            int[] aux = new int[H];
+            int y = seam[x];
+            System.arraycopy(map[x], 0, aux, 0, y);
+            System.arraycopy(map[x], y+1, aux, y, H-y);
+        }
     }
 
 
@@ -48,11 +72,11 @@ public class PixMap {
         return pic;
     }
 
-    public int getH() {
+    public int height() {
         return H;
     }
 
-    public int getW() {
+    public int width() {
         return W;
     }
 
