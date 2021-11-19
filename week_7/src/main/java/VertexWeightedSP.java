@@ -74,7 +74,7 @@ public class VertexWeightedSP {
         }
         int loY = (y == 0) ? y : y-1;
         int hiY =  (y == H-1) ? y: y + 1;
-        int n = loY - hiY + 1;
+        int n = hiY- loY + 1;
         int[] adj = new int[n];
         for (int i = 0; i < n; i++) {
             adj[i] = loY + i;

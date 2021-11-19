@@ -108,10 +108,10 @@ public class SeamCarver {
         SeamCarver SC = new SeamCarver( pic );
 
         int[] vSeam = SC.findVerticalSeam();
-        System.out.printf("Vertical seam: %s", Arrays.toString(vSeam));
+        System.out.printf("Vertical seam: %s%n", Arrays.toString(vSeam));
 
         int[] hSeam = SC.findHorizontalSeam();
-        System.out.printf("Vertical seam: %s", Arrays.toString(hSeam));
+        System.out.printf("Horizontal seam: %s%n", Arrays.toString(hSeam));
     }
 
 }

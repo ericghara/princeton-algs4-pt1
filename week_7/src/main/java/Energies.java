@@ -12,7 +12,7 @@ public class Energies {
         W = pic.width();
         H = pic.height();
         pixMap = createPixMap(pic);
-        energies = createEnergies();
+        createEnergies();
         eInterface = new Normal();
     }
 
@@ -107,14 +107,13 @@ public class Energies {
         return (double) sum;
     }
 
-    private double[][] createEnergies() {
-        double[][] energies = new double[W][H];
+    private void createEnergies() {
+        energies = new double[W][H];
         for (int x = 0; x < W; x++ ) {
             for (int y = 0; y < H; y++) {
                 calcEnergy(x,y);
             }
         }
-        return energies;
     }
 
     private int [][] createPixMap(Picture pic) {
