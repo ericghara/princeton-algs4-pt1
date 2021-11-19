@@ -69,7 +69,7 @@ public class SeamCarver {
     }
 
     private void checkPixel(int x, int y) {
-        if ( 0 < x || x >= W || 0 < y || y >= H) {
+        if ( x < 0 || x >= W || y < 0 || y >= H) {
             throw new IllegalArgumentException("Pixel coordinates invalid: (" + x + ", " + y + ")." );
         }
     }
@@ -81,8 +81,8 @@ public class SeamCarver {
     }
 
     private void validateSeam(int[] seam, Direction dir) {
-        int onAxisSize = (dir == Direction.H) ? H : W;
-        int offAxisSize = (dir == Direction.H) ? W : H;
+        int onAxisSize = (dir == Direction.V) ? H : W;
+        int offAxisSize = (dir == Direction.V) ? W : H;
 
         if (offAxisSize <= 1) {
             throw new IllegalArgumentException("Picture is too small to remove another seam");
