@@ -51,8 +51,8 @@ public class Energies {
             for (int y = 0; y < H; y++) {
                 if (pixMap[x][y] == 0) {
                     pixMap[x][y] = pixMap[x+1][y]; // move pixel left
-                    pixMap[x+1][y] = 0; // mark hole to be filled
                     energies[x][y] = energies[x+1][y]; // move weight left
+                    pixMap[x+1][y] = 0; // mark hole to be filled
                 }
             }
         }
@@ -61,7 +61,7 @@ public class Energies {
         calcEnergy(seam, Direction.V);
     }
 
-    // Note overloaded, this should be used when recalculating around a removed seam
+    // Note overloaded, this should be used when recalculating energies around a removed seam
     private void calcEnergy(int[] seam, Direction dir ) {
         if (dir == Direction.V) {
             for (int y = 0; y < H; y++) {
@@ -156,33 +156,20 @@ public class Energies {
 
     // use for horizontal shortest paths
     public class Normal implements VertexWeightedSP.MatrixInterface {
-        public double get(int x, int y) {
-            return energies[x][y];
-        }
+        public double get(int x, int y) { return energies[x][y]; }
 
-        public int height() {
-            return H;
-        }
+        public int height() { return H; }
 
-        public int width() {
-            return W;
-        }
+        public int width() { return W; }
     }
 
     // use for vertical shortest paths; provides client access to energies
     // as a transposed matrix
     public class Transposed implements VertexWeightedSP.MatrixInterface {
-        public double get(int x, int y) {
-            return energies[y][x];  // notice transposed
-        }
+        public double get(int x, int y) { return energies[y][x]; }   // notice transposed
 
-        public int height() {
-            return W; // ...transposed
-        }
+        public int height() { return W; } // ...transposed
 
-        public int width() {
-            return H;  // ...and transposed
-        }
-
+        public int width() { return H; } // ...and transposed
     }
 }

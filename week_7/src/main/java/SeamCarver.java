@@ -92,19 +92,28 @@ public class SeamCarver {
         }
     }
 
-    //
+    // Provide a path to a picture and the number of columns and rows you'd like to remove
+    // ex: gradle run -PmainClass=SeamCarver --args="src/test/resources/logo.png 100 0"
     public static void main(String[] args) {
-        if (args.length != 1) {
-            throw new IllegalArgumentException("Received incorrect argument.  Usage SeamCarver {path to image file}");
+        if (args.length != 3) {
+            throw new IllegalArgumentException("Received incorrect argument.  Usage SeamCarver {path to image file}  #cols #rows");
         }
-        Picture pic = new Picture( args[0] );
+        Picture pic = new Picture(args[0]);
+        int COL = Integer.parseInt(args[1]);
+        int ROW = Integer.parseInt(args[2]);
         SeamCarver SC = new SeamCarver( pic );
 
-        int[] vSeam = SC.findVerticalSeam();
-        System.out.printf("Vertical seam: %s%n", Arrays.toString(vSeam));
-
-        int[] hSeam = SC.findHorizontalSeam();
-        System.out.printf("Horizontal seam: %s%n", Arrays.toString(hSeam));
+        for (int i = 0; i < COL; i++) {
+            int[] vSeam = SC.findVerticalSeam();
+            SC.removeVerticalSeam(vSeam);
+            System.out.printf("Removed vertical seam: %s%n", Arrays.toString(vSeam));
+        }
+        for (int i = 0; i < ROW; i++) {
+            int[] hSeam = SC.findHorizontalSeam();
+            SC.removeHorizontalSeam(hSeam);
+            System.out.printf("Horizontal seam: %s%n", Arrays.toString(hSeam));
+        }
+        pic.show();
+        SC.picture().show();
     }
-
 }
