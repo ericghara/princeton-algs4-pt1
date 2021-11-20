@@ -1,11 +1,12 @@
 import edu.princeton.cs.algs4.Picture;
+import java.util.Arrays;
 
 public class Energies {
 
     private final VertexWeightedSP.MatrixInterface eInterface;
-    private final int[][] pixMap;
+    private int[][] pixMap;
     private int W, H;
-    private static double[][] energies;
+    private double[][] energies;
     private enum Direction {V,H};
 
     public Energies(Picture pic) {
@@ -30,7 +31,7 @@ public class Energies {
             // energies
             double[] auxE = new double[H];
             System.arraycopy(energies[x], 0, auxE, 0, y);
-            System.arraycopy(energies[x], y+1, auxE, 0, H-y);
+            System.arraycopy(energies[x], y+1, auxE, y, H-y);
             energies[x] = auxE;
         }
         calcEnergy(seam, Direction.H);
@@ -41,25 +42,26 @@ public class Energies {
         // (mostly) in place eager delete, extra space = W
         for (int y = 0; y < H; y++) {
             int x = seam[y];
-            pixMap[x][y] = -1; // mark for deletion
+            pixMap[x][y] = 0; // mark for deletion (valid pixels are negative ints)
         }
         /* Fills in holes of pixels marked for deletion by moving pixels directly to the right into holes.
          *  After a move, pixel to the right now becomes a hole.  Process repeats until entire rightmost column
          *  is holes (and can be deleted) */
         for (int x = 0; x < W-1; x++) {
             for (int y = 0; y < H; y++) {
-                if (pixMap[x][y] == -1) {
+                if (pixMap[x][y] == 0) {
                     pixMap[x][y] = pixMap[x+1][y]; // move pixel left
-                    pixMap[x+1][y] = -1; // mark hole to be filled
+                    pixMap[x+1][y] = 0; // mark hole to be filled
                     energies[x][y] = energies[x+1][y]; // move weight left
                 }
             }
         }
-        System.arraycopy(pixMap, 0, pixMap, 0, --W);  // decreases width of matrix by 1
-        System.arraycopy(energies, 0, energies, 0, W);
+        pixMap = Arrays.copyOfRange(pixMap,0, --W); // decreases width of matrix by 1
+        energies = Arrays.copyOfRange(energies,0, W);
         calcEnergy(seam, Direction.V);
     }
 
+    // Note overloaded, this should be used when recalculating around a removed seam
     private void calcEnergy(int[] seam, Direction dir ) {
         if (dir == Direction.V) {
             for (int y = 0; y < H; y++) {
@@ -153,33 +155,33 @@ public class Energies {
     public VertexWeightedSP.MatrixInterface getEnergyInterface() { return eInterface; }
 
     // use for horizontal shortest paths
-    public static class Normal implements VertexWeightedSP.MatrixInterface {
+    public class Normal implements VertexWeightedSP.MatrixInterface {
         public double get(int x, int y) {
             return energies[x][y];
         }
 
         public int height() {
-            return energies[0].length;
+            return H;
         }
 
         public int width() {
-            return energies.length;
+            return W;
         }
     }
 
     // use for vertical shortest paths; provides client access to energies
     // as a transposed matrix
-    public static class Transposed implements VertexWeightedSP.MatrixInterface {
+    public class Transposed implements VertexWeightedSP.MatrixInterface {
         public double get(int x, int y) {
             return energies[y][x];  // notice transposed
         }
 
         public int height() {
-            return energies.length; // ...transposed
+            return W; // ...transposed
         }
 
         public int width() {
-            return energies[0].length;  // ...and transposed
+            return H;  // ...and transposed
         }
 
     }

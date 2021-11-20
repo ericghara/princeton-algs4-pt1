@@ -63,7 +63,7 @@ task srcZip(type: Zip) {
     //find zip in distributions folder
     // exclude this.java
     // include that.java
-    exclude 'PrintEnergy.java', 'PrintSeams.java', 'ResizeDemo.java', 'SCUtility.java', 'ShowEnergy.java', 'ShowSeams.java'
+    include "Energies.java", "SeamCarver.java", "VertexWeightedSP.java"
     archiveFileName = "seam.zip"
     archiveClassifier = 'src'
     from sourceSets*.allSource

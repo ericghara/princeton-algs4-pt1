@@ -1,19 +1,17 @@
 import edu.princeton.cs.algs4.Picture;
 import java.util.Arrays;
 
+/* Implements seam carving algorithm which allows resizing images without cropping or distortion
+*  Info: https://en.wikipedia.org/wiki/Seam_carving */
 public class SeamCarver {
     private final Energies energies;
     private final VertexWeightedSP.MatrixInterface eInterface;
     private enum Direction {V,H};
-    private Picture pic;
-    private boolean redrawPic;
     private int W, H;
 
     // create a SeamCarver object based on the given picture
     public SeamCarver(Picture pic) {
         validatePic(pic);
-        this.pic = new Picture(pic);  // Picture constructor performs a defensive copy
-        redrawPic = false;
         energies = new Energies(pic);
         eInterface = energies.getEnergyInterface();
         W = eInterface.width();
@@ -22,11 +20,7 @@ public class SeamCarver {
 
     // current picture
     public Picture picture() {
-        if (redrawPic) {
-            pic = energies.redraw();
-            redrawPic = false;
-        }
-        return new Picture(pic); // defensive copy
+        return new Picture( energies.redraw() ); // defensive copy
     }
 
     // width of current picture
@@ -43,26 +37,25 @@ public class SeamCarver {
 
     // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
-        if (H <= 1) {
-            throw new IllegalArgumentException("Cannot remove seam, height <= 1.");
-        }
+        //if (H <= 1) {
+        //    throw new IllegalArgumentException("Cannot remove seam, height <= 1.");
+        //}
         validateSeam(seam, Direction.H);
         energies.removeHorizontalSeam(seam);
         H = eInterface.height();
-        redrawPic = true;
     }
 
     // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
-        if (W <= 1) {
-            throw new IllegalArgumentException("Cannot remove seam, width <= 1.");
-        }
+        //if (W < 2) {
+        //    throw new IllegalArgumentException("Cannot remove seam, width <= 1.");
+        //}
         validateSeam(seam, Direction.V);
         energies.removeVerticalSeam(seam);
         W = eInterface.width();
-        redrawPic = true;
     }
 
+    // Gets energy (ie vertex weight) of a pixel
     public double energy(int x, int y) {
         checkPixel(x,y);
         return eInterface.get(x,y);
@@ -99,7 +92,7 @@ public class SeamCarver {
         }
     }
 
-    //  unit testing
+    //
     public static void main(String[] args) {
         if (args.length != 1) {
             throw new IllegalArgumentException("Received incorrect argument.  Usage SeamCarver {path to image file}");

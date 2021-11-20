@@ -1,11 +1,12 @@
 
-// Finds the lowest weight path from left to right in a matrix
+// Vertex Weighted Shortest Path
+// Finds the lowest weight horizontal path across a matrix
 public class VertexWeightedSP {
 
-    private final double[][] weightTo;
-    private final int[][] lastVert;
-    private static int W, H;
-    private final MatrixInterface wMatrix;
+    private final double[][] weightTo;  // cumulative weight to reach vertex
+    private final int[][] lastVert;  // y coordinate of vertex used to reach current vertex
+    private int W, H;
+    private final MatrixInterface wMatrix; // Interface VWSP uses to access external weight matrix
 
     public interface MatrixInterface {
 
@@ -41,6 +42,7 @@ public class VertexWeightedSP {
         return minY;
     }
 
+    // Traces lowest weight path using lastVert matrix
     public int[] shortestPath() {
         int tailY = findTail();
         int[] path = new int[W];
@@ -53,6 +55,7 @@ public class VertexWeightedSP {
         return path;
     }
 
+    // Uses a DP algorithm to calculate the lowest weight path to any vertex
     private void calcPath() {
         // Stops at 2nd to last column because this looks at the next possible move from current;
         // there are no possible moves from the last column.
