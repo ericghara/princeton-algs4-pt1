@@ -52,10 +52,10 @@ public class HashAlgs {
         }
 
         public void append(int c, WordHash WH) {
-            // WARNING: only applicable for non-negative c; for negatives: hash32 ^= (PRIME32 & 0xff)
+            // WARNING: only applicable for non-negative c; for negatives: hash32 ^= (c & 0xff)
             WH.hash32 ^= c;
             WH.hash32 *= PRIME32;
-            // WARNING: only applicable for non-negative c; for negatives: hash64 ^= (PRIME64 & 0xffff)
+            // WARNING: only applicable for non-negative c; for negatives: hash64 ^= (c & 0xffff)
             WH.hash64 ^= c;
             WH.hash64 *= PRIME64;
         }

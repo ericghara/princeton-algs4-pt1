@@ -1,4 +1,4 @@
-import edu.princeton.cs.algs4.LinearProbingHashST;
+import java.util.HashMap;
 
 public class WordHash {
     static int Q,U;
@@ -21,6 +21,11 @@ public class WordHash {
 
     public WordHash() {
         hashFn.init(this);
+    }
+
+    public WordHash(int c) {
+        hashFn.init(this);
+        append(c);
     }
 
     public WordHash(int[] word) {
@@ -81,7 +86,7 @@ public class WordHash {
 
     public static void main(String[] args){
         if (args.length != 2 || args[0].length() > args[1].length()) { throw new IllegalArgumentException("Input a prefix and a word i.e. \"ti titanium\" "); }
-        LinearProbingHashST<WordHash, String> ST = new LinearProbingHashST<>();
+        HashMap<WordHash, String> ST = new HashMap<>();
 
         WordHash.hashFn = new HashAlgs.FNV1a();
         int[] prefix = WordHash.intArray( args[0].toUpperCase() );

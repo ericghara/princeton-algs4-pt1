@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.LinkedList;
 import java.io.File;
@@ -11,7 +12,7 @@ public class WordMap {
     static int U = 'U';
 
     final HashMap<WordHash, String> dict; // Dictionary
-    final HashMap<WordHash, Boolean> subs; // Substrings that lead to valid words
+    final HashSet<WordHash> subs; // Substrings that lead to valid words
 
 
     public WordMap(String[] dictionary) {
@@ -21,10 +22,19 @@ public class WordMap {
         int dictCap = DICT_N_MULTIPLE * dictionary.length;
         int subsCap = SUBS_N_MULTIPLE * dictionary.length;
         dict = new HashMap<>(dictCap);
-        subs = new HashMap<>(subsCap);
+        subs = new HashSet<>(subsCap);
         makeMaps(dictionary);
 
     }
+
+    public boolean validSub(WordHash sub) { return subs.contains(sub); }
+
+    /**
+     *
+     * @param word
+     * @return null if word not found; word if word found.
+     */
+    public String validWord(WordHash word) { return dict.get(word); }
 
     private void makeMaps(String[] dictionary) {
         // It seems repetitive to clean the dict then to create dict and subs
@@ -64,13 +74,13 @@ public class WordMap {
                 } // Word ends in QU so Q is effectively the last letter
             }
             wHash.append(c);
-            subs.put(new WordHash(wHash), true);
+            subs.add(new WordHash(wHash));
         }
         wHash.append(word.charAt(i));
         dict.put(wHash, word);
     }
 
-    private static String[] parseDict(String path) {
+    static String[] parseDict(String path) {
         LinkedList<String> dList = new LinkedList<>();
         Scanner scanner;
         try {
@@ -89,14 +99,14 @@ public class WordMap {
 
     private void interactiveSearch() {
         Scanner in = new Scanner(System.in);
-        System.out.println("Welcome to the Interactive Dictionary search\n" +
-                "Type a word and press enter to search; !q to exit");
+        System.out.println("Welcome to the Interactive Dictionary Search.\n" +
+                "Type a word and press enter; !q to exit");
         while (in.hasNextLine()) {
             String q = in.next().toUpperCase();
             if (q.equals("!Q")) { break; }
             WordHash wh = new WordHash(WordHash.intArray(q));
             System.out.printf("Querry %s\tDictionary: %s\tSubstrings: %s%n", q,
-                    dict.containsKey(wh) ? "Found" : "Not Found", subs.containsKey(wh) ? "Found" : "Not Found");
+                    dict.containsKey(wh) ? "Found" : "Not Found", subs.contains(wh) ? "Found" : "Not Found");
         }
 
     }
