@@ -1,6 +1,4 @@
-/* ### Provided by Instructor -- not my Code ###
- *
- ******************************************************************************
+/******************************************************************************
  *  Compilation:  javac BoggleBoard.java
  *  Execution:    java  BoggleBoard
  *  Dependencies: StdRandom.java In.java StdOut.java

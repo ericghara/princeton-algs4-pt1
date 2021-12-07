@@ -1,39 +1,65 @@
 import java.util.HashMap;
 
-public class WordHash {
-    static int Q,U;
-    static HashAlgs.Hash hashFn;
-
-    static {
-        Q = 'Q';
-        U = 'U';
-        hashFn = new HashAlgs.Modular();
-    }
+/**
+ * Container for string hash values.  Holds a 32 bit and 64 bit hash of the string.  No copy of the string is saved.
+ * Equality between WordHash objects is determined by comparing the hash values of the objects.  Hash collisions
+ * are very unlikely for different single word length strings, but are statistically possible.  The hash function
+ * used should be provided through the {@code HashAlgs.Hash} interface.
+ */
+public class WordHash implements Cloneable {
+    private static int Q = 'Q', U = 'U';
+    static HashAlgs.Hash hashFn = new HashAlgs.Modular();
 
     int hash32;
     long hash64;
 
+    /**
+     * Constructs a copy of a WordHash object
+     *
+     * @param that object to be copied.
+     */
     public WordHash(WordHash that) {
         if (that == null) { throw new IllegalArgumentException("Received WordHash null input.");}
         hash32 = that.hash32;
         hash64 = that.hash64;
     }
 
+
+    /**
+     * Basic constructor.  Initializes a WordHash without adding any characters.
+     */
     public WordHash() {
         hashFn.init(this);
     }
 
+    /**
+     * Constructs a WordHash object from a single character.
+     *
+     * @param c int value of character
+     */
     public WordHash(int c) {
         hashFn.init(this);
         append(c);
     }
 
+    /**
+     * Converts a character array to a WordHash object.
+     *
+     * @param word character array (as an array of ints)
+     */
     public WordHash(int[] word) {
         hash(word);
     }
 
-    public static void hashFn(HashAlgs.Hash hashFn) { WordHash.hashFn = hashFn; }
+    /**
+     * Override the default hash function used by WordHash.  To avoid breaking everything, run this before any
+     * WordHash objects have been constructed.  <em>Tread carefully</em>.
+     *
+     * @param hashFn a function that implements the {@code HashAlgs.Hash} interface.
+     */
+    static void hashFn(HashAlgs.Hash hashFn) { WordHash.hashFn = hashFn; }
 
+    // Adds the character array to this object
     private void hash(int [] word) {
         hashFn.init(this);
         for (int c : word) {
@@ -42,17 +68,28 @@ public class WordHash {
         }
     }
 
+    /**
+     * Adds a single character to the WordHash object
+     *
+     * @param c character to be added (as an int)
+     */
     public void append(int c) { hashFn.append(c,this); }
 
+    /**
+     * Returns a hashcode value for the object
+     *
+     * @return 32 bit hashcode
+     */
     @Override
     public int hashCode() { return hash32; }
 
     /**
      *  This equals function <em>does not</em> conform to the general {@code equals} contract.
-     *  Specifically equality is tested by comparing 2 different 32 bit hashes from
+     *  Specifically equality is tested by comparing 2 different hashes from
      *  {@code this} object and that {@code that} to determine equality.  In very rare cases
-     *  this could lead to different words testing equal. The probability of this is <em>extremely</em>
-     *  low therefore a design decision was made to implement this style equality for speed.
+     *  this could lead to WordHashes created from different words testing equally.  The probability
+     *  of this is extremely low, however if an acceptable {@code hashFn} is used.
+     *
      * @param o {@code Object} for comparison to this
      */
     @Override
@@ -64,6 +101,12 @@ public class WordHash {
         return this.hash32 == that.hash32 && this.hash64 == that.hash64;
     }
 
+    /**
+     * Converts a word into an int[] of its char values (akin to a char array).
+     *
+     * @param word to be converted to int array
+     * @return array of character values as an int[].
+     */
     static public int[] intArray(String word) {
         final int N = word.length();
         int[] intWord = new int[N];
@@ -83,7 +126,12 @@ public class WordHash {
     private void primeDiag() { hashFn.primeDiag(); }
 
 
-
+    /**
+     * Test client which permutes a substring's hash into that of a longer word.  Prints diagnostics to
+     * stdout.
+     *
+     * @param args a substring and a parent word, e.g. ti titanium. Case-insensitive.
+     */
     public static void main(String[] args){
         if (args.length != 2 || args[0].length() > args[1].length()) { throw new IllegalArgumentException("Input a prefix and a word i.e. \"ti titanium\" "); }
         HashMap<WordHash, String> ST = new HashMap<>();

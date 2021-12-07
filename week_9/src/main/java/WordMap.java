@@ -2,11 +2,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.LinkedList;
-import java.io.File;
+import java.io.File;  // For testing, comment for autograder
 
+
+/**
+ *  Allows checking for valid boggle words and substrings that <i>could</i> lead to valid words.
+ *  A valid word is: >= 3 letters long and only contain Q with a directly following U.  Words are
+ *  stored based on their hash fingerprints, to find a word in the dictionary or to find a substring
+ *  words are not actually compared to each other, instead a word match is approximated to a very
+ *  high degree of certainty.
+ */
 public class WordMap {
-    static int DICT_N_MULTIPLE = 3;
-    static int SUBS_N_MULTIPLE = 9;
+    static int DICT_N_MULTIPLE = 3; // Note: modify to tune performance and memory usage
+    static int SUBS_N_MULTIPLE = 9; // Note: modify to tune performance and memory usage
     static int MIN_WORD_LEN = 3;
     static int Q = 'Q';
     static int U = 'U';
@@ -14,7 +22,11 @@ public class WordMap {
     final HashMap<WordHash, String> dict; // Dictionary
     final HashSet<WordHash> subs; // Substrings that lead to valid words
 
-
+    /**
+     * Constructs a WordMap object
+     *
+     * @param dictionary words WordMap will parse for valid Boggle words and generate a substring set from.
+     */
     public WordMap(String[] dictionary) {
         if (dictionary == null) {
             throw new IllegalArgumentException("Received a null dictionary");
@@ -27,21 +39,38 @@ public class WordMap {
 
     }
 
+    /**
+     * Determines if the WordHash object represents the substring of a valid Boggle word.
+     *
+     * @param sub substring query
+     * @return {@code true} if a valid substring {@code false} if not a valid substring.
+     */
     public boolean validSub(WordHash sub) { return subs.contains(sub); }
 
     /**
+     * Determines if word (hash) is in the dictionary <em>and</em> a playable Boggle word.
      *
-     * @param word
-     * @return null if word not found; word if word found.
+     * @param word dictionary query
+     * @return null if word is not found; word (String) if the word is found.
      */
     public String validWord(WordHash word) { return dict.get(word); }
 
+    /**
+     * Determines if a word is in the dictionary <em>and</em> a playable Boggle word.
+     *
+     * @param word dictionary query
+     * @return null if word is not found; word (String) if the word is found.
+     */
+    public String validWord(String word) {
+        WordHash wHash = new WordHash(WordHash.intArray(word)); // Must hash word to search
+        return dict.get(wHash);
+    }
+
+    /* Genearates subs and dict objects */
     private void makeMaps(String[] dictionary) {
-        // It seems repetitive to clean the dict then to create dict and subs
-        // maps, but it's very hard to backtrack when a Q without a trailing U is found.
-        // Hashing is lossy so, no undo is possible for an illegal word
-        // leading to zombie hashes in the subs set. The design decision was to
-        // heavily prioritize word search speed over constructor speed.
+        /* There is no good way to backtrack when an invalid word is found as it is
+        difficult to determine if a sub was added for the invalid word or was already
+        in the dictionary.  We need to make sure a word is valid then parse its subs */
         for (String word : dictionary) {
             int n = word.length();
             if (n < MIN_WORD_LEN || word.charAt(n - 1) == Q) {
@@ -59,6 +88,7 @@ public class WordMap {
         }
     }
 
+    /* Adds substring hashes to subs and maps WordHashes to strings  */
     private void add(String word) {
         WordHash wHash = new WordHash();
         int n = word.length();
@@ -80,7 +110,10 @@ public class WordMap {
         dict.put(wHash, word);
     }
 
+
+    /* Converts a dictionary file to a String Array.  File should be words separated by a whitespace character */
     static String[] parseDict(String path) {
+        // for testing. Remove for autograder
         LinkedList<String> dList = new LinkedList<>();
         Scanner scanner;
         try {
@@ -97,6 +130,9 @@ public class WordMap {
         return dList.toArray(new String[0]);
     }
 
+    /* Type in a word to determine if it is a valid Boggle word and if it's a substring of another boggle word.
+       Result is printed to stdout.
+     */
     private void interactiveSearch() {
         Scanner in = new Scanner(System.in);
         System.out.println("Welcome to the Interactive Dictionary Search.\n" +
@@ -111,7 +147,15 @@ public class WordMap {
 
     }
 
+    /**
+     * A test client which loads a dictionary file and opens an interactive search allowing a user
+     * to determine via command line input if a word is a valid boggle word and if it's the substring
+     * of a valid boggle word.
+     *
+     * @param args path to dictionary text file, format: words separated by a whitespace character.
+     */
     public static void main(String[] args) {
+        // for testing remove for autograder;
         if (args.length != 1) {
             throw new IllegalArgumentException("Provide path to a dictionary file.");
         }

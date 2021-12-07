@@ -1,6 +1,10 @@
 import java.math.BigInteger;
 import java.util.Random;
 
+/**
+ * A small collection of hash algorithms for use by WordHash objects and an interface for utilizing them.  Algorithms
+ * calculate 32 bit and 64 bit hashes.
+ */
 public class HashAlgs {
 
     public interface Hash {
@@ -9,11 +13,16 @@ public class HashAlgs {
         void primeDiag();
     }
 
+    /**
+     * A standard modular hash algorithm.
+     */
     public static class Modular implements Hash {
 
         private static final int PRIME32, RADIX;
         private static final long PRIME64;
 
+        // remove static block and replace probablePrimes with fixed primes for the autograder
+        // (can't import from math package)
         static {
             BigInteger BI0 =  BigInteger.probablePrime(31, new Random() );
             BigInteger BI1 = BigInteger.probablePrime(63, new Random() );
@@ -21,6 +30,7 @@ public class HashAlgs {
             PRIME64 = BI1.longValue();
             RADIX = 26;
         }
+
         public void init(WordHash WH) {
             WH.hash32 = 0;
             WH.hash64 = 0;
@@ -34,17 +44,13 @@ public class HashAlgs {
         public void primeDiag() { System.out.printf("Prime32: %d%nPrime64: %d%n", PRIME32, PRIME64);}
     }
 
+    /**
+     * An implementation of a Fowler–Noll–Vo hash function, FNV-1a. Adapted from
+     * @see <a href="https://tools.ietf.org/pdf/draft-eastlake-fnv-16.pdf">"The FNV Non-Cryptographic Hash Algorithm"</a>.
+     */
     public static class FNV1a implements Hash {
-        // Adapted from "The FNV Non-Cryptographic Hash Algorithm": https://tools.ietf.org/pdf/draft-eastlake-fnv-16.pdf
-        private static final int PRIME32, OFFSET32;
-        private static final long PRIME64, OFFSET64;
-
-        static {
-            OFFSET32 = 0x811c9dc5;
-            PRIME32 = 16777619;
-            PRIME64 = 0xcbf29ce484222325L;
-            OFFSET64 = 1099511628211L;
-        }
+        private static final int OFFSET32 = 0x811c9dc5, PRIME32 = 16777619;
+        private static final long PRIME64 = 0xcbf29ce484222325L, OFFSET64 = 1099511628211L;
 
         public void init(WordHash WH) {
             WH.hash32 = OFFSET32;
@@ -61,7 +67,5 @@ public class HashAlgs {
         }
 
         public void primeDiag() { System.out.printf("Prime32: %d%nPrime64: %d%n", PRIME32, PRIME64);}
-
     }
-
 }
