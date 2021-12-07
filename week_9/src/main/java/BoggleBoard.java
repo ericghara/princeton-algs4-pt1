@@ -1,3 +1,5 @@
+// Code provided by instructor
+
 /******************************************************************************
  *  Compilation:  javac BoggleBoard.java
  *  Execution:    java  BoggleBoard
