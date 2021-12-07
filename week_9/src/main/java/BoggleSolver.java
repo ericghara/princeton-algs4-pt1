@@ -5,7 +5,7 @@ import java.util.HashSet;
 /**
  * This is a solver for Boggle (essentially a word search).  It implements hash based data structures (hashmap
  * and hashset) as opposed to the more commonly used trie.  This solver is able to maintain comparable speed
- * to a trie by using a continuously updated hash (similar to a rolling hash but unbounded).  In order to match words
+ * to a trie by using a continuously updated hash (similar to a rolling hash, but unbounded).  In order to match words
  * hash based fingerprinting is used, strings are never directly compared, hence this is a Monte Carlo algorithm.
  * Benchmarks (compared to an optimized Trie solver): Speed: 1.88x (slower), Space: 0.58x (less).
  */

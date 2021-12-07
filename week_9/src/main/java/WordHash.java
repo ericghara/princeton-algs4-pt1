@@ -6,7 +6,7 @@ import java.util.HashMap;
  * are very unlikely for different single word length strings, but are statistically possible.  The hash function
  * used should be provided through the {@code HashAlgs.Hash} interface.
  */
-public class WordHash implements Cloneable {
+public class WordHash {
     private static int Q = 'Q', U = 'U';
     static HashAlgs.Hash hashFn = new HashAlgs.Modular();
 
