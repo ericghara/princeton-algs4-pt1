@@ -103,7 +103,7 @@ class BoggleSolverTest {
             final int N = BOARD_FILTER.length();
             final int E = BOARD_EXT.length();
 
-            // create board objects, parse total number of points (when using dictionary-yawl.txt)
+            // create board objects, parse expected number of points
             for (String filename : files) {
                 String fullPath = BOARD_DIR + "/" + filename;
                 BoggleBoard board = new BoggleBoard(fullPath);
