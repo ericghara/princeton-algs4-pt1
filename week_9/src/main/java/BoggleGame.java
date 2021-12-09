@@ -1,4 +1,7 @@
 /******************************************************************************
+ *
+ *  NOTE: This code was provided by the instructor.
+ *
  *  Compilation:  javac BoggleGame.java
  *  Execution:    java BoggleGame [m n]
  *  Dependencies: BoggleSolver.java BoggleBoard.java 
