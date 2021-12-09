@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class BoggleSolverTest {
+
     private static final String BOARD_DIR = "src/test/resources/boards";
     private static final String DICTIONARY_DIR = "src/test/resources/dictionaries";
     private static final String DICTIONARY_FILTER = "dictionary-";
@@ -54,8 +55,8 @@ class BoggleSolverTest {
      */
     public Stream<Arguments> importDicts() {
         List<String> files = getFiles(DICTIONARY_DIR, DICTIONARY_FILTER);
-
         List<Arguments> args = new LinkedList<>();
+
         for (String filename : files) {
             String fullPath = DICTIONARY_DIR + "/" + filename;
             String[] importedDict = WordMap.parseDict(fullPath);
@@ -77,6 +78,7 @@ class BoggleSolverTest {
     @TestInstance(Lifecycle.PER_CLASS)
     @Nested
     class BoggleSolverSearchTest{
+
         private final BoggleSolver solver;
 
         public BoggleSolverSearchTest() {
