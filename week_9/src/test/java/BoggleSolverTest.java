@@ -19,8 +19,8 @@ class BoggleSolverTest {
     private static final String BOARD_DIR = "src/test/resources/boards";
     private static final String DICTIONARY_DIR = "src/test/resources/dictionaries";
     private static final String DICTIONARY_FILTER = "dictionary-";
-    private static final String DEFAULT_DICTIONARY = "dictionary-yawl.txt";  // used by all but the constructor unit test
-    private static final String BOARD_FILTER = "board-points"; // used to identify board files
+    private static final String DEFAULT_DICTIONARY = "dictionary-yawl.txt";
+    private static final String BOARD_FILTER = "board-points";
     private static final String BOARD_EXT = ".txt";
 
 
