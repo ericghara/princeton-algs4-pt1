@@ -76,18 +76,23 @@ public class BoggleSolver {
         final int R, C, N;
 
         private WordSearch(BoggleBoard board) {
-            R = board.rows();
-            C = board.cols();
-            N = R*C;
-            found = new LinkedList<>();
+            R = board.rows();   // number of rows
+            C = board.cols();   // number of columns
+            N = R*C;            // number of letters
+            found = new LinkedList<>(); // found valid words are stored here
             if (N >= WordMap.MIN_WORD_LEN) {
                 this.board = new int[N];
                 importBoard(board);
                 dfs();
             }
-            else { this.board = new int[0]; }
+            else { this.board = new int[0]; } // don't search if board to small to create scorable words
         }
 
+
+        /**
+         * Pulls all letters from a BoggleBoard object
+         * @param board to be imported and solved.
+         */
         private void importBoard(BoggleBoard board) {
             int i = 0;
             for (int r = 0; r < R; r++) {
@@ -97,6 +102,12 @@ public class BoggleSolver {
             }
         }
 
+        /**
+         * Gives the destination index after moving from a start index in a given direction.
+         * @param i start index
+         * @param d direction
+         * @return position after moving in the given direction; -1 if the move is impossible.
+         */
         private int move(int i, Directions d) {
             int r = (i/C) + d.r;  // row after move
             int c = (i%C) + d.c;  // col after move
@@ -104,10 +115,18 @@ public class BoggleSolver {
             return r * C + c;
         }
 
+        /**
+         * Converts a row and column to an index in the flattened board.
+         *
+         * @param r row
+         * @param c column
+         * @return index in flattened board
+         */
         private int getBoardIndex(int r, int c) {  return r * C + c; }
 
-        /* Begins the word search. Provides DFS worker a stack with only a single tile in it (ie will call dfsWorker
-           N times).
+        /**
+         * Begins the word search. Provides DFS worker a stack with only a single tile in it (ie will call dfsWorker
+         * N times).
          */
         private void dfs() {
             LinkedList<DFSHash> stack = new LinkedList<>();
@@ -120,11 +139,19 @@ public class BoggleSolver {
             }
         }
 
-        /* Iterative DFS to find board words.  Uses WordMap's validSub to determine when to backtrack (ie when
-           a substring cannot lead to valid words).  The entire matching process is hash based.  A hash is
-           continuously updated with each added letter and word matches are found in the HashMap using the hash
-           as a key and String as the value.  Duplicates are prevented using a set of found word hashes.  To implement
-           this, WordHash and DFSHash data types are used which are lightweight containers for hashes.
+        /**
+         * Iterative DFS to find board words.  Uses WordMap's validSub to determine when to backtrack (ie when
+         * a substring cannot lead to valid words).  The entire matching process is hash based.  A hash is
+         * continuously updated with each added letter and word matches are found in the HashMap using the hash
+         * as a key and String as the value.  Duplicates are prevented using a set of found word hashes.  To implement
+         * this, WordHash and DFSHash data types are used which are lightweight containers for hashes.
+         *
+         * Modifies the {@code found} instance variable
+         *
+         * @param stack origin of the DFS, in typical operation stack should contain a single DFSHash item
+         * @param foundSet hashes of words which have already been added to found (prevents duplicates)
+         * @param seen seen words.  dfsworker should receive an array filled with false values and will
+         *             return an array of false values.
          */
         private void dfsWorker(LinkedList<DFSHash> stack,HashSet<DFSHash> foundSet, boolean[] seen) {
             for (DFSHash cur = stack.peek(); !(stack.isEmpty()); cur = stack.peek()) {
@@ -151,12 +178,16 @@ public class BoggleSolver {
             }
         }
 
+        /**
+         * Allows client to retrieve found words
+         * @return list of found words based on the dictionary provided, Contains no duplicates.
+         */
         public Iterable<String> found() { return found; }
     }
 
     /**
      * Solves the input boards and prints to stdout the words found and the total score for the board.
-     * Board files should be UTF-8 encoded text files.  Below is the example of a file for a 4x4 board
+     * Board files should be UTF-8 encoded text files.  Below is the example of a file for a 4x4 board.
      *
      * 4 4
      * U  T  G  W

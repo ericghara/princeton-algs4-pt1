@@ -8,13 +8,29 @@ import java.util.Random;
 public class HashAlgs {
 
     public interface Hash {
+        /**
+         * Sets initial values for the {@code hash32} and {@code hash64} objects
+         *
+         * @param WH WordHash object to initialize
+         */
         void init(WordHash WH);
+
+        /**
+         * Recalculates hashes after adding a character to the WordHash object
+         *
+         * @param c character to be added
+         * @param WH WordHash object to modify
+         */
         void append(int c, WordHash WH);
+
+        /**
+         * Prints diagnostic info about the primes being used to stdout.
+         */
         void primeDiag();
     }
 
     /**
-     * A standard modular hash algorithm.
+     * A hash implementation of Horner's method (ie a modular hash function).
      */
     public static class Modular implements Hash {
 
@@ -22,10 +38,10 @@ public class HashAlgs {
         private static final long PRIME64;
 
         // remove static block and replace probablePrimes with fixed primes for the autograder
-        // (can't import from math package)
+        // (can't use the math package or static blocks)
         static {
-            BigInteger BI0 =  BigInteger.probablePrime(31, new Random() );
-            BigInteger BI1 = BigInteger.probablePrime(63, new Random() );
+            BigInteger BI0 =  BigInteger.probablePrime(31, new Random() ); // 31 bit prime
+            BigInteger BI1 = BigInteger.probablePrime(63, new Random() ); // 63 bit prime
             PRIME32 = BI0.intValue();
             PRIME64 = BI1.longValue();
             RADIX = 26;

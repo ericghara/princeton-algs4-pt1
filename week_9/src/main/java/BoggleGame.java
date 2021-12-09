@@ -1,5 +1,3 @@
-// Code Provided by Instructor
-
 /******************************************************************************
  *  Compilation:  javac BoggleGame.java
  *  Execution:    java BoggleGame [m n]

@@ -8,6 +8,7 @@ import java.util.HashMap;
  */
 public class WordHash {
     private static int Q = 'Q', U = 'U';
+    // Modular shows faster constructor and solver performance than FNV1a
     static HashAlgs.Hash hashFn = new HashAlgs.Modular();
 
     int hash32;
