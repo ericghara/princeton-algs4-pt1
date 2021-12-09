@@ -84,8 +84,6 @@ class BoggleSolverTest {
             solver = new BoggleSolver( WordMap.parseDict(dictPath) );
         }
 
-
-
         /**
          * Imports all board text files from the {@code BOARD_DIR} containing the {@code BOARD_FILTER}
          * in their filename.  The files are converted to a BoggleBoard type.  Board names should <em>only<em/>
