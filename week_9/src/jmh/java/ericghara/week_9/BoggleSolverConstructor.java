@@ -21,17 +21,16 @@ public class BoggleSolverConstructor {
     private static final String[] ITALIAN = WordMap.parseDict(DICTIONARY_DIR + "dictionary-zingarelli2005.txt");
     private static final String[] ENGLISH = WordMap.parseDict(DICTIONARY_DIR + "dictionary-yawl.txt");
 
-
    @Benchmark
     public void Italian(Blackhole blackhole){
        BoggleSolver solver = new BoggleSolver(ITALIAN);
-       blackhole.consume( solver );
+       blackhole.consume(solver);
    }
 
    @Benchmark
    public void English(Blackhole blackhole){
        BoggleSolver solver = new BoggleSolver(ENGLISH);
-       blackhole.consume( solver );
+       blackhole.consume(solver);
    }
 
 }

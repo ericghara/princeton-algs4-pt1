@@ -15,14 +15,15 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
 public class BoggleSolverGetAllValidWords {
-    private static final String DICTIONARY_DIR = "src/test/resources/dictionaries/";
-    private static final String[] ENGLISH = WordMap.parseDict(DICTIONARY_DIR + "dictionary-yawl.txt");
 
-    private final BoggleSolver solver = new BoggleSolver(ENGLISH);
+    private static final String DICTIONARY_DIR = "src/test/resources/dictionaries/";
+    private static final String[] DICTIONARY = WordMap.parseDict(DICTIONARY_DIR + "dictionary-yawl.txt");
+
+    private final BoggleSolver solver = new BoggleSolver(DICTIONARY);
 
     @State(Scope.Thread)
-    public static class ThisState {
-        BoggleBoard board;
+    public static class RandomState {
+        private BoggleBoard board;
 
         @Setup(Level.Invocation)
         public void setup() {
@@ -39,7 +40,7 @@ public class BoggleSolverGetAllValidWords {
     @Measurement(time = 2, timeUnit = TimeUnit.SECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Benchmark
-    public void random4x4(ThisState state, Blackhole blackhole) {
+    public void random4x4(RandomState state, Blackhole blackhole) {
         Iterable<String> res = solver.getAllValidWords(state.board);
         blackhole.consume(res);
     }
