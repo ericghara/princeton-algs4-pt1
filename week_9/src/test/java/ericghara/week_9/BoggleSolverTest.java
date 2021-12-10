@@ -1,3 +1,5 @@
+package ericghara.week_9;
+
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;

@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'me.champeau.jmh' version '0.6.1'
 }
 
 group 'org.example'
@@ -48,6 +49,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    jmh 'org.openjdk.jmh:jmh-core:1.32'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.32'
 }
 
 application {
@@ -63,21 +66,26 @@ test {
     useJUnitPlatform()
 }
 
+jmh {
+
+    warmupIterations = 2
+    warmup = '1s'
+    iterations = 5
+    fork = 1
+}
+
 task srcZip(type: Zip) {
-    //Zips all files in src's child directories.
-    //find zip in distributions folder
+    //Zips all files in src/main's child directories; flattens to remove dir structure
     // exclude this.java
     // include that.java
-    include "BoggleSolver.java", "DFSHash.java", "HashAlgs.java", "WordHash.java", "WordMap.java"
     archiveFileName = "boggle.zip"
-    archiveClassifier = 'src'
-    from sourceSets*.allSource
+    from sourceSets.main.allSource.flatten()
 }
 
 task DownloadSrc (type: Download) {
     def inDir = 'https://coursera.cs.princeton.edu/algs4/assignments/boggle/files/'
-    def outDir = "src/main/java/"
-    def names = ['BoggleGame.java', 'BoggleBoard.java']
+    def outDir = "src/main/java/ericghara/week_9/"
+    def names = []
     inFiles = []
     outFiles = []
     for (f in names) {

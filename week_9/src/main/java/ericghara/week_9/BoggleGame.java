@@ -1,3 +1,5 @@
+package ericghara.week_9;
+
 /******************************************************************************
  *
  *  NOTE: This code was provided by the instructor.

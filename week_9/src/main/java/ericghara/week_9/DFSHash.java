@@ -1,3 +1,5 @@
+package ericghara.week_9;
+
 /**
  * Extends WordHash to add an immutable index value.  The index refers to the index of the last letter added to the
  * hash on the (flattened) Boggle board.

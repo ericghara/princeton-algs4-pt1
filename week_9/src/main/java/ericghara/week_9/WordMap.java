@@ -1,3 +1,5 @@
+package ericghara.week_9;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -112,7 +114,7 @@ public class WordMap {
 
 
     /* Converts a dictionary file to a String Array.  File should be words separated by a whitespace character */
-    static String[] parseDict(String path) {
+    public static String[] parseDict(String path) {
         // for testing. Remove for autograder
         LinkedList<String> dList = new LinkedList<>();
         Scanner scanner;

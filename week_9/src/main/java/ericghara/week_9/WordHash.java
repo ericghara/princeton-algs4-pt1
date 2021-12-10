@@ -1,3 +1,5 @@
+package ericghara.week_9;
+
 import java.util.HashMap;
 
 /**
