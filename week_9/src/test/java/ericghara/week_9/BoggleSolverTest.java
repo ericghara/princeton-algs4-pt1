@@ -10,10 +10,12 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class BoggleSolverTest {
@@ -29,9 +31,9 @@ class BoggleSolverTest {
     /**
      * General purpose method get a list of filenames in a directory that contain a specific substring
      *
-     * @param dir - path to directory to be searched
-     * @param filter - a unique substring that is only contained in the desired files
-     * @return - a list of files matching the filter
+     * @param dir path to directory to be searched
+     * @param filter a unique substring that is only contained in the desired files
+     * @return a list of files matching the filter
      */
     private static List<String> getFiles(String dir, String filter) {
         List<String> files;
@@ -67,7 +69,7 @@ class BoggleSolverTest {
         return args.stream();
     }
 
-    @ParameterizedTest( name = "{index} - {1}" )
+    @ParameterizedTest( name = "Constructor test {index} - {1}" )
     @Timeout( value = 5, unit = SECONDS )
     @MethodSource( "importDicts" )
     public void constructor(String[] dictionary, String filename) {
@@ -116,13 +118,42 @@ class BoggleSolverTest {
             return args.stream();
         }
 
-        @ParameterizedTest( name = "{index} - {1} points" )
+        private int calcScore(Iterable<String> words) {
+            return StreamSupport.stream(words.spliterator(),false)
+                                .mapToInt(solver::scoreOf)
+                                .sum();
+        }
+
         @MethodSource( "importBoards")
+        @ParameterizedTest( name = "Correctness of getAllValidWords {index} - {1} points" )
         void getAllValidWords(BoggleBoard board, int points) {
             Iterable<String> words = solver.getAllValidWords(board);
-            int score = 0;
-            for (String s: words) { score += solver.scoreOf(s); };
+            int score = calcScore(words);
             assertEquals(score, points );
+        }
+
+        @Test
+        @DisplayName( "getAllValidWords does not mutate its outputs" )
+        void solverDoesNotMutateOutput() {
+            // Solves multiple boards and scores after ALL are solved.
+            // If this test doesn't pass and getAllValidWords test does,
+            // the solver is mutating outputs
+            ArrayList<Integer> points = new ArrayList<>();
+            ArrayList<Iterable<String>> words = new ArrayList<>();
+            Arguments[] args = importBoards().toArray(Arguments[]::new);
+            // clunky because reusing method designed for MethodSource to provide Arguments
+            for (Arguments a : args) {
+                Object[] argArray = a.get();
+                BoggleBoard board = (BoggleBoard) argArray[0];
+                Integer correctScore = (Integer) argArray[1];
+                words.add( solver.getAllValidWords(board) );
+                points.add(correctScore);
+            }
+            for (int i = 0; i < points.size(); i++) {
+                Integer foundScore = calcScore(words.get(i) );
+                Integer correctScore = points.get(i);
+                assertEquals(correctScore, foundScore);
+            }
         }
     }
 }

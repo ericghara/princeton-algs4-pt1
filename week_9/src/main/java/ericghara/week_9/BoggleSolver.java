@@ -50,7 +50,7 @@ public class BoggleSolver {
         if (board == null) {
             throw new IllegalArgumentException("Received a null Board");
         }
-        search.hotStart(board);
+        search.solveBoard(board);
         return search.found();
     }
 
@@ -82,7 +82,7 @@ public class BoggleSolver {
         int R, C, N;
 
         /**
-         * Initializes everything to zero or empty values.  For use with hotStart
+         * Initializes everything to zero or empty values.  For use with {@code solveBoard}
          */
         private WordSearch(){
             R = 0;  // number of rows
@@ -94,9 +94,11 @@ public class BoggleSolver {
         }
 
         /**
-         * Finds all valid words in an input board, which can subsequently be accessed by getFound
+         * Finds all valid words in an input board, which can subsequently be accessed by {@code getFound}.
+         * There is no need to call {@code solveBoard}.  Although {@code solveBoard} can be used if another board
+         * needs to be solved without creating a new WordSearch object.
          *
-         * @param board - BoggleBoard to search for valid words in.
+         * @param board BoggleBoard to search for valid words in.
          */
         private WordSearch(BoggleBoard board) {
             R = board.rows();
@@ -117,9 +119,9 @@ public class BoggleSolver {
          * a new WordSearch for each new board when board dimensions are the same.  If the board dimensions
          * are different there is no performance penalty vs constructing a new WordSearch.
          *
-         * @param board - BoggleBoard to solve
+         * @param board BoggleBoard to solve
          */
-        void hotStart(BoggleBoard board) {
+        void solveBoard(BoggleBoard board) {
             int r = board.rows();
             int c = board.cols();
             int newN = r * c;
