@@ -13,6 +13,8 @@ import java.util.HashSet;
  */
 public class BoggleSolver {
 
+    private final WordSearch search = new WordSearch();
+
     private enum Directions {
         S(1,0),   N(-1,0),
         SE(1,1),  NW(-1,-1),
@@ -28,6 +30,7 @@ public class BoggleSolver {
     }
 
     private static final  int[] score = {0,0,0,1,1,2,3,5,11}; // index: word length, value: points
+    private static final int NUM_DIRECTIONS = Directions.values().length;
     private final WordMap WM;
 
     /**
@@ -47,7 +50,7 @@ public class BoggleSolver {
         if (board == null) {
             throw new IllegalArgumentException("Received a null Board");
         }
-        WordSearch search = new WordSearch(board);
+        search.hotStart(board);
         return search.found();
     }
 
@@ -73,21 +76,81 @@ public class BoggleSolver {
 
     private class WordSearch {
 
-        final LinkedList<String> found;
-        final int[] board;
-        final int R, C, N;
+        LinkedList<String> found;
+        int[] board;    // boggle board converted to char vals as a flattened matrix
+        int[] moves;    // available moves from each board position. Flattened matrix.
+        int R, C, N;
 
+        /**
+         * Initializes everything to zero or empty values.  For use with hotStart
+         */
+        private WordSearch(){
+            R = 0;  // number of rows
+            C = 0;  // number of columns
+            N = 0;  // number of letters
+            found = new LinkedList<>(); // found valid words are stored here
+            moves = new int[0];
+            board = new int[0];
+        }
+
+        /**
+         * Finds all valid words in an input board, which can subsequently be accessed by getFound
+         *
+         * @param board - BoggleBoard to search for valid words in.
+         */
         private WordSearch(BoggleBoard board) {
-            R = board.rows();   // number of rows
-            C = board.cols();   // number of columns
-            N = R*C;            // number of letters
+            R = board.rows();
+            C = board.cols();
+            N = R*C;
             found = new LinkedList<>(); // found valid words are stored here
             if (N >= WordMap.MIN_WORD_LEN) {
                 this.board = new int[N];
                 importBoard(board);
+                calcMoves();
                 dfs();
             }
             else { this.board = new int[0]; } // don't search if board to small to create scorable words
+        }
+
+        /**
+         * Used to solve a new board with an already constructed wordSearch object.  Faster than creating
+         * a new WordSearch for each new board when board dimensions are the same.  If the board dimensions
+         * are different there is no performance penalty vs constructing a new WordSearch.
+         *
+         * @param board - BoggleBoard to solve
+         */
+        void hotStart(BoggleBoard board) {
+            int r = board.rows();
+            int c = board.cols();
+            int newN = r * c;
+            found = new LinkedList<>();
+            if (newN != N && newN >= WordMap.MIN_WORD_LEN ) {
+                N = newN;
+                this.board = new int[N];
+            }
+            if (r != R || c != C) {
+                R = r;
+                C = c;
+                calcMoves();
+            }
+            importBoard(board);
+            dfs();
+        }
+
+        /**
+         * Calculates all legal moves from each board position.  Moves are stored in a flattened
+         * matrix.  Offers a significant performance improvement over a non-memoized approach.
+         * Valid moves >= 0 invalid moves == -1.
+         */
+        private void calcMoves() {
+            Directions[] dirs = Directions.values();
+            moves = new int[N * dirs.length];
+            for (int movesI = 0, boardI = 0; boardI < N; ) {
+                for (Directions d : dirs) {
+                    moves[movesI++] = move(boardI, d);
+                }
+                boardI++;
+            }
         }
 
 
@@ -164,8 +227,9 @@ public class BoggleSolver {
                     continue;
                 }
                 seen[i] = true;
-                for (Directions d : Directions.values()) {
-                    int nextI = move(i, d);
+                final int startM = i*NUM_DIRECTIONS;  // calc starting position in moves array
+                for (int m = startM; m < startM + NUM_DIRECTIONS; m++) {
+                    int nextI = moves[m];
                     if (nextI == -1 || seen[nextI]) { continue; }
 
                     DFSHash nextH = new DFSHash(cur, nextI, board[nextI]);
@@ -190,12 +254,13 @@ public class BoggleSolver {
     /**
      * Solves the input boards and prints to stdout the words found and the total score for the board.
      * Board files should be UTF-8 encoded text files.  Below is the example of a file for a 4x4 board.
-     *
-     * 4 4
-     * U  T  G  W
-     * L  T  N  T
-     * P  S  R  N
-     * B  C  X  C
+     *<table>
+     * <tr>4 4</tr>
+     * <tr>U  T  G  W</tr>
+     * <tr>L  T  N  T</tr>
+     * <tr>P  S  R  N</tr>
+     * <tr>B  C  X  C</tr>
+     *</table>
      *
      * @param args Path to dictionary and path to board files separated by a space
      */

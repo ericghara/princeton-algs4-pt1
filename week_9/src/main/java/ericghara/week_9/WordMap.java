@@ -15,8 +15,8 @@ import java.io.File;  // For testing, comment for autograder
  *  high degree of certainty.
  */
 public class WordMap {
-    static int DICT_N_MULTIPLE = 3; // Note: modify to tune performance and memory usage
-    static int SUBS_N_MULTIPLE = 9; // Note: modify to tune performance and memory usage
+    static int DICT_N_MULTIPLE = 4; // Note: modify to tune performance and memory usage
+    static int SUBS_N_MULTIPLE = 12; // Note: modify to tune performance and memory usage
     static int MIN_WORD_LEN = 3;
     static int Q = 'Q';
     static int U = 'U';

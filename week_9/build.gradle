@@ -78,6 +78,7 @@ task srcZip(type: Zip) {
     //Zips all files in src/main's child directories; flattens to remove dir structure
     // exclude this.java
     // include that.java
+    exclude "BoggleGame.java", "BoggleBoard.java"
     archiveFileName = "boggle.zip"
     from sourceSets.main.allSource.flatten()
 }

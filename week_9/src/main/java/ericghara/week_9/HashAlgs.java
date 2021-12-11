@@ -67,8 +67,8 @@ public class HashAlgs {
      * @see <a href="https://tools.ietf.org/pdf/draft-eastlake-fnv-16.pdf">"The FNV Non-Cryptographic Hash Algorithm"</a>.
      */
     public static class FNV1a implements Hash {
-        private static final int OFFSET32 = 0x811c9dc5, PRIME32 = 16777619;
-        private static final long PRIME64 = 0xcbf29ce484222325L, OFFSET64 = 1099511628211L;
+        private static final int PRIME32 = 16777619, OFFSET32 = 0x811c9dc5;
+        private static final long PRIME64 = 1099511628211L, OFFSET64 = 0xcbf29ce484222325L;
 
         public void init(WordHash WH) {
             WH.hash32 = OFFSET32;
