@@ -8,7 +8,7 @@ import java.util.HashMap;
  * are very unlikely for different single word length strings, but are statistically possible.  The hash function
  * used should be provided through the {@code HashAlgs.Hash} interface.
  */
-public class WordHash {
+public class WordHash implements Comparable<WordHash> {
     private static int Q = 'Q', U = 'U';
     // Modular shows faster constructor and solver performance than FNV1a
     static HashAlgs.Hash hashFn = new HashAlgs.Modular();
@@ -122,11 +122,21 @@ public class WordHash {
         return intWord;
     }
 
-    private void hashDiag() {
-        System.out.printf("Hash32: %d%nHash64: %d%n", hash32, hash64);
+    @Override
+    public String toString() {
+        return String.format("Hash32: %d%nHash64: %d%n", hash32, hash64);
     }
 
     private void primeDiag() { hashFn.primeDiag(); }
+
+    @Override
+    public int compareTo(WordHash that) {
+        int comp32 = Integer.compare(this.hash32,that.hash32);
+        if (comp32 != 0) {
+            return comp32;
+        }
+        return Long.compare(this.hash64,that.hash64);
+    }
 
 
     /**
@@ -156,9 +166,9 @@ public class WordHash {
             if (i >= prefix.length || prefix[i] == 0) { prefix2word.append(word[i]); }
         }
 
-        prefixHash.hashDiag();
-        wordHash.hashDiag();
-        prefix2word.hashDiag();
+        System.out.println(prefixHash);
+        System.out.println(wordHash);
+        System.out.println(prefix2word);
         System.out.printf("Hash Collision: %b%n", wordHash.equals(prefixHash));
         System.out.printf("Get prefix from ST: %s%n", ST.get(new WordHash(prefix)));
         System.out.printf("Get word from ST: %s%n", ST.get(new WordHash(word)));
