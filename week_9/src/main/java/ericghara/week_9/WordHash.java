@@ -6,7 +6,8 @@ import java.util.HashMap;
  * Container for string hash values.  Holds a 32 bit and 64 bit hash of the string.  No copy of the string is saved.
  * Equality between WordHash objects is determined by comparing the hash values of the objects.  Hash collisions
  * are very unlikely for different single word length strings, but are statistically possible.  The hash function
- * used should be provided through the {@code HashAlgs.Hash} interface.
+ * used should be provided through the {@code HashAlgs.Hash} interface.  For the {@code compareTo} implementation,
+ * the 32-bit hash takes priority over the 64-bit hash.
  */
 public class WordHash implements Comparable<WordHash> {
     private static int Q = 'Q', U = 'U';
@@ -122,6 +123,7 @@ public class WordHash implements Comparable<WordHash> {
         return intWord;
     }
 
+
     @Override
     public String toString() {
         return String.format("Hash32: %d%nHash64: %d%n", hash32, hash64);
@@ -129,6 +131,14 @@ public class WordHash implements Comparable<WordHash> {
 
     private void primeDiag() { hashFn.primeDiag(); }
 
+
+    /**
+     * Wordhash objects are compared by the numerical magnitude of their hashes.  The 32-bit hash takes
+     * priority over the 64-bit hash.
+     *
+     * @param that the WordHash object to compare to
+     * @return -1 if that is less than this object, 0 if equal to and 1 if greater than (see details above)
+     */
     @Override
     public int compareTo(WordHash that) {
         int comp32 = Integer.compare(this.hash32,that.hash32);
