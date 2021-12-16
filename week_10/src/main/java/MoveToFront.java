@@ -1,7 +1,5 @@
 import edu.princeton.cs.algs4.BinaryStdIn;
 import edu.princeton.cs.algs4.BinaryStdOut;
-import edu.princeton.cs.algs4.HexDump;
-
 
 public class MoveToFront {
 
@@ -60,8 +58,8 @@ public class MoveToFront {
         BinaryStdOut.close();
     }
 
-        private static class MTFData {
-            private static final int R = 255;
+        static class MTFData {
+            static final int R = 256;
 
             static int[] initArray() {
                 int[] arr = new int[R];
@@ -90,7 +88,7 @@ public class MoveToFront {
     public static void main (String[]args){
         if (args.length != 1 || !(args[0].equals("+") || args[0].equals("-")) ) {
             throw new IllegalArgumentException("Incorrect usage: + to encode - to decode." +
-                    "example usage: java MoveToFront + < \"abracadabra!\"");
+                    "example usage: java MoveToFront + < \"test.txt\"");
         }
         if (args[0].equals("+")) {
             encode();
