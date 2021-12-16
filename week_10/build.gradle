@@ -1,0 +1,99 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            // * include or exclude sources in build
+            // * **** USAGE ****
+            // * exclude "**/Someclass.java"
+            // * include "**/SomeClass.java"
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    ivy {
+        url 'https://algs4.cs.princeton.edu/code/'
+
+        patternLayout {
+            artifact '[module].jar'
+        }
+
+        // This is required in Gradle 6.0+ as metadata file (ivy.xml)
+        metadataSources { artifact() }
+    }
+
+}
+
+compileJava {
+    dependsOn "DownloadSrc"
+    finalizedBy "srcZip"
+}
+
+dependencies {
+    implementation group: 'edu.princeton.cs', name: 'algs4', version: '1.0.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+application {
+    // usage example: gradle run -PmainClass=XYZ --args=ARGS --info
+    setMainClass(project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL")
+}
+
+run {
+    standardInput = System.in
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task srcZip(type: Zip) {
+    //Zips all files in src/main's child directories; flattens to remove dir structure
+    // exclude this.java
+    // include that.java
+    archiveFileName = "burrows.zip"
+    from sourceSets.main.allSource.flatten()
+}
+
+task DownloadSrc (type: Download) {
+    def inDir = 'https://coursera.cs.princeton.edu/algs4/assignments/boggle/files/'
+    def outDir = "src/main/java/ericghara/week_9/"
+    def names = []
+    inFiles = []
+    outFiles = []
+    for (f in names) {
+        outFiles.add(file(outDir + f))
+        inFiles.add(inDir + f)
+    }
+}
+
+class Download extends DefaultTask {
+    @Input
+            inFiles
+
+    @OutputFiles
+            outFiles
+
+    @TaskAction
+    void download() {
+        for(int i = 0; i < inFiles.size(); i++ ) {
+            ant.get(src: inFiles[i], dest: outFiles[i])
+        }
+    }
+}
