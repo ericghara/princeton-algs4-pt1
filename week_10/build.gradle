@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-group 'org.example'
+group 'org.ericghara'
 version '1.0-SNAPSHOT'
 
 java {
@@ -19,6 +19,7 @@ sourceSets {
             // * **** USAGE ****
             // * exclude "**/Someclass.java"
             // * include "**/SomeClass.java"
+            //exclude "**/BurrowsWheeler.java"
         }
     }
 }

@@ -10,10 +10,9 @@ public class CircularSuffixArrayTest {
 
     @Test
     void CircularSuffixTest() {
-        char[] testChars = test.toCharArray();
         for (int i = 0; i < N; i++) {
             String correct = rotate(test,i);
-            CircularSuffixArray.CircularSuffix cs = new CircularSuffixArray.CircularSuffix(i, testChars);
+            CircularSuffix cs = new CircularSuffix(i, test);
             String unknown = cs.toString();
             //Assertions.assertEquals(correct,unknown);
             Assertions.assertEquals(1,1);
@@ -21,12 +20,15 @@ public class CircularSuffixArrayTest {
     }
 
     @Test
-    void SortTest() {
+    void SortTest() {;
         CircularSuffixArray CSA = new CircularSuffixArray(test);
-        CircularSuffixArray.CircularSuffix[] unknown = CSA.suffixes;
-        CircularSuffixArray.CircularSuffix[] correct =  Stream.of(unknown)
-                                                              .map(CircularSuffixArray.CircularSuffix::new)
-                                                              .toArray(CircularSuffixArray.CircularSuffix[]::new);
+        CircularSuffix[] unknown = new CircularSuffix[N];
+        for (int i = 0; i < N; i++) {
+            unknown[i] = new CircularSuffix(CSA.index(i),test);
+        }
+        CircularSuffix[] correct =  Stream.of(unknown)
+                                          .map(CircularSuffix::new)
+                                          .toArray(CircularSuffix[]::new);
         Arrays.sort(correct);
         Assertions.assertArrayEquals(unknown,correct);
     }
