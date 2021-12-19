@@ -1,36 +1,82 @@
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
 
 public class BurrowsWheelerTest {
+    static final int NUM_BYTES = Integer.BYTES;
+    static final int BITS_PER_BYTE = 8;
 
+
+    static char[] getBytes(int i) {
+        int mask = 0xff << (BITS_PER_BYTE*(NUM_BYTES -1));
+        char[] charArray = new char[NUM_BYTES];
+        for (int j = 0; j < NUM_BYTES; j++) {
+            charArray[j] |= mask & i;
+            mask >>= BITS_PER_BYTE;
+        }
+        return charArray;
+    }
+
+    static int extractInt(String s) {
+        int mask = 0xff;
+        int out = 0;
+        for (int j = 0; j < NUM_BYTES; j++) {
+            char c = s.charAt(j);
+            out |= (c & mask);
+        }
+        s = s.substring(NUM_BYTES);
+        return out;
+    }
+
+
+    @AfterAll
+    static void shutdown() {
+        StreamHandler.resetAll();
+    }
+
+    /**
+     * Tests transforming a string.
+     */
     @Test
     void transformTest() {
-        String s = "ABRACADABRA!";
-        char[] correct = {0x00, 0x00, 0x00, 0x03, 0x41, 0x52, 0x44, 0x21, 0x52, 0x43, 0x41, 0x41, 0x41, 0x41, 0x42, 0x42};
-        String unknown = BurrowsWheelerString.transform(s);
-        Assertions.assertEquals(unknown, new String(correct));
+        char[] expected = {0x00, 0x00, 0x00, 0x03, 0x41, 0x52, 0x44, 0x21, 0x52, 0x43, 0x41, 0x41, 0x41, 0x41, 0x42, 0x42};
+        String input = "ABRACADABRA!";
+        ByteArrayOutputStream found = StreamHandler.streamInStreamOut(input);
+        BurrowsWheeler.transform();
+        Assertions.assertEquals(new String(expected), found.toString() );
     }
 
+
+    /**
+     * Tests decoding ({@code inverseTransform}) a string with specified offset.
+     */
     @Test
     void inverseTransformTest() {
+        String expected = "ABRACADABRA!";
         int offset = 3;
+        char[] offsetBytes = getBytes(offset);
         char[] encoded = {0x41, 0x52, 0x44, 0x21, 0x52, 0x43, 0x41, 0x41, 0x41, 0x41, 0x42, 0x42};
-        String correct = "ABRACADABRA!";
-        String unknown = BurrowsWheelerString.inverseTransform(new String(encoded), offset);
-        Assertions.assertEquals(correct, unknown);
+        String input = new String(offsetBytes) + new String(encoded);
+        ByteArrayOutputStream found = StreamHandler.streamInStreamOut(input);
+        BurrowsWheeler.inverseTransform();
+        Assertions.assertEquals(expected, found.toString() );
     }
 
+    /**
+     * Tests that the original string is obtained after a transform followed by inverse transform of the result (
+     * i.e. input -> encode -> decode -> output == input)
+     */
     @Test
     void TransformInverseTransformTest() {
-        String s = "THISisAtopSECRETmessage!!!^-^that just keeps going on and on... and on.. and o-";
-        String t = BurrowsWheelerString.transform(s);
-        // convert byte representation of an int to an int
-        int offset = (t.charAt(0)<<24)&0xff000000|
-                     (t.charAt(1)<<16)&0x00ff0000|
-                     (t.charAt(2)<<8)&0x0000ff00|
-                     (t.charAt(3)<<0)&0x000000ff;
-        String actual = BurrowsWheelerString.inverseTransform(t.substring(4),offset);
-        Assertions.assertEquals(s,actual);
+        String start = "THISisAtopSECRETmessage!!!^-^that just keeps going on and on... and on.. and o-";
+        ByteArrayOutputStream transform = StreamHandler.streamInStreamOut(start);
+        BurrowsWheeler.transform();
+        ByteArrayOutputStream found = StreamHandler.streamInStreamOut(transform.toString() );
+        BurrowsWheeler.inverseTransform();
+        Assertions.assertEquals(start,found.toString());
     }
 
 }

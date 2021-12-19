@@ -11,14 +11,17 @@ public class CircularSuffixArrayTest {
     @Test
     void CircularSuffixTest() {
         for (int i = 0; i < N; i++) {
-            String correct = rotate(test,i);
+            String expected = rotate(test,i);
             CircularSuffix cs = new CircularSuffix(i, test);
-            String unknown = cs.toString();
-            //Assertions.assertEquals(correct,unknown);
-            Assertions.assertEquals(1,1);
+            String actual = cs.toString();
+            Assertions.assertEquals(expected,actual);
         }
     }
 
+    /**
+     * Tests LSD sort (deprecated) implemented in CircularSuffix class.  The {@code Arrays.sort} is faster
+     * for most inputs, so do not use.
+     */
     @Test
     void SortTest() {;
         CircularSuffixArray CSA = new CircularSuffixArray(test);
@@ -34,7 +37,7 @@ public class CircularSuffixArrayTest {
     }
 
     /**
-     * Rotates an input string left by i characters.
+     * Rotates an input string left by i characters.  Uses a different method than implemented in CircularSuffixArray.
      *
      * ex. s = "1234", i = 1
      *     output: "2341"
@@ -46,17 +49,24 @@ public class CircularSuffixArrayTest {
     private static String rotate(String s, int i) {
         int N = s.length();
         char[] chars = new char[N];
-        for (int j = 0; j < N-i; j++) {
-            chars[j] = s.charAt(j+i);
+        for (int j = i; j < N; j++) {
+            chars[j-i] = s.charAt(j);
         }
-        N--;
-        for (int j = 0; j <= i; j++) {
-            chars[N-j] = s.charAt(j);
+        for (int j = 0; j < i; j++) {
+            chars[N-i+j] = s.charAt(j);
         }
         return new String(chars);
     }
 
+    /**
+     * A quick unit test of the test.
+     *
+     * @param args provide no args, unfortunately java has only one main method signature.
+     */
     public static void main(String[] args) {
+        if (args != null) {
+            throw new IllegalArgumentException("Provide no arguments to main.");
+        }
         CircularSuffixArrayTest test = new CircularSuffixArrayTest();
         test.CircularSuffixTest();
     }
