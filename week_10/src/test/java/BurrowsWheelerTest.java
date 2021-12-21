@@ -1,13 +1,11 @@
 import org.junit.jupiter.api.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-
 public class BurrowsWheelerTest {
     static final int NUM_BYTES = Integer.BYTES;
     static final int BITS_PER_BYTE = 8;
+    /*** methods to test ***/
+    static Runnable transform = BurrowsWheeler::transform;
+    static Runnable inverseTransform = BurrowsWheeler::inverseTransform;
 
 
     static char[] getBytes(int i) {
@@ -34,7 +32,7 @@ public class BurrowsWheelerTest {
 
     @AfterAll
     static void shutdown() {
-        StreamHandler.resetAll();
+        StreamWrapper.resetAll();
     }
 
     /**
@@ -44,9 +42,8 @@ public class BurrowsWheelerTest {
     void transformTest() {
         char[] expected = {0x00, 0x00, 0x00, 0x03, 0x41, 0x52, 0x44, 0x21, 0x52, 0x43, 0x41, 0x41, 0x41, 0x41, 0x42, 0x42};
         String input = "ABRACADABRA!";
-        ByteArrayOutputStream found = StreamHandler.streamInStreamOut(input);
-        BurrowsWheeler.transform();
-        Assertions.assertEquals(new String(expected), found.toString() );
+        String found = StreamWrapper.run(input, transform);
+        Assertions.assertEquals(new String(expected), found );
     }
 
 
@@ -60,9 +57,8 @@ public class BurrowsWheelerTest {
         char[] offsetBytes = getBytes(offset);
         char[] encoded = {0x41, 0x52, 0x44, 0x21, 0x52, 0x43, 0x41, 0x41, 0x41, 0x41, 0x42, 0x42};
         String input = new String(offsetBytes) + new String(encoded);
-        ByteArrayOutputStream found = StreamHandler.streamInStreamOut(input);
-        BurrowsWheeler.inverseTransform();
-        Assertions.assertEquals(expected, found.toString() );
+        String found = StreamWrapper.run(input, inverseTransform);
+        Assertions.assertEquals(expected, found );
     }
 
     /**
@@ -72,11 +68,9 @@ public class BurrowsWheelerTest {
     @Test
     void TransformInverseTransformTest() {
         String start = "THISisAtopSECRETmessage!!!^-^that just keeps going on and on... and on.. and o-";
-        ByteArrayOutputStream transform = StreamHandler.streamInStreamOut(start);
-        BurrowsWheeler.transform();
-        ByteArrayOutputStream found = StreamHandler.streamInStreamOut(transform.toString() );
-        BurrowsWheeler.inverseTransform();
-        Assertions.assertEquals(start,found.toString());
+        String trans = StreamWrapper.run(start, transform);
+        String found = StreamWrapper.run(trans, inverseTransform );
+        Assertions.assertEquals(start,found);
     }
 
 }
