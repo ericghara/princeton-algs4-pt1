@@ -15,7 +15,7 @@ public class StreamWrapper {
     /**
      * This method is intended for testing methods that read from an input stream and write to an output stream.
      * Three tasks are sequentially performed: <ol><li>Write the provided {@code input} to an input stream</li>
-     * <li>Run the provided {@code runnable}</li> <li>Read the entire output stream</li> </ol>
+     * <li>Run the provided {@code runnable}</li> <li>Read the entire output stream</li></ol>
      *
      * @param input string to be written to an input stream
      * @param runnable a method which will consume the input stream and write to an output stream
