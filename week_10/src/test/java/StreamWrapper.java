@@ -13,13 +13,13 @@ public class StreamWrapper {
     static final PrintStream outBackup = System.out;
 
     /**
-     * This will write the provided {@code input} string to an input stream and run the provided {@code runnable}
-     * and return the output stream as a string.  The intended use case is testing methods which read from an input
-     * stream and write to an output stream.
+     * This method is intended for testing methods that read from an input stream and write to an output stream.
+     * Three tasks are sequentially performed: 1) write the provided {@code input} to an input stream,
+     * 2) run the provided {@code runnable} 3) read the entire output stream.
      *
      * @param input string to be written to an input stream
      * @param runnable a method which will consume the input stream and write to an output stream
-     * @return complete contents of the output stream as a string
+     * @return complete contents of the output stream as a String
      */
     public static String run(String input, Runnable runnable) {
         ByteArrayOutputStream out = streamInStreamOut(input);
