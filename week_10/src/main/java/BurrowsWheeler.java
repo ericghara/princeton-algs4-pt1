@@ -15,17 +15,17 @@ public class BurrowsWheeler {
         String s = BinaryStdIn.readString();
         int n = s.length();
         CircularSuffixArray CSA = new CircularSuffixArray(s);
-        int first = -1;
+        int first = -1; // sentinel
         StringBuilder transform = new StringBuilder(n);
-        n--;
+        n--; // 0 index n
         for (int i = 0; i <= n; i++) {
             CircularSuffix suffix = new CircularSuffix(CSA.index(i), s);
             if (suffix.getOffset() == 0) {
-                first = i;
+                first = i; // find un-rotated suffix
             }
             transform.append(suffix.charAt(n));
         }
-        BinaryStdOut.write(first);
+        BinaryStdOut.write(first); // write out sorted position of un-rotated suffix
         BinaryStdOut.write(transform.toString() );
         closeStreams();
     }
