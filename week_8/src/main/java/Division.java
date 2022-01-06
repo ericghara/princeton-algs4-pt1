@@ -1,23 +1,23 @@
 import edu.princeton.cs.algs4.In;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Objects;
-import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Comparator;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Division implements Iterable<Team> {
     private final int N; // number of teams
     private final Team[] teams;
-    private final HashMap<String,Team> teamLookup;
+    private final LinkedHashMap<String,Team> teamLookup; // Linked for easier testing of getTeamNames();
 
     public Division(String filePath) {
         In file = openFile(filePath);
         N = file.readInt();
         teams = new Team[N];
-        teamLookup = new HashMap<>();
+        teamLookup = new LinkedHashMap<>();
 
         for (int teamNum = 0; teamNum < N; teamNum++) {
             addTeam(teamNum, file);
@@ -82,11 +82,11 @@ public class Division implements Iterable<Team> {
         Team maxW = Stream.of(teams)
                             .max(Comparator.naturalOrder())
                             .orElseThrow( () -> new IllegalArgumentException("Received an empty teams array"));
-        String[] maxTeamName = {maxW.getTeamName()};
+        String[] certOfElim = {maxW.getTeamName()};
 
         for (Team t:teams) {
             if ( t.getMaxDivisionWins() < maxW.getWins() ) {
-                t.setCertOfElim(Arrays.asList(maxTeamName));
+                t.setCertOfElim(Arrays.asList(certOfElim));
             }
         }
     }

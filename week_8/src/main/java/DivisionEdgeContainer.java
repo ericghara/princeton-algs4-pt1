@@ -15,7 +15,7 @@ public class DivisionEdgeContainer implements Iterable<FlowEdge>{
             this.Id = Id;
         }
     }
-    static int TEAMID_OFFSET = Vertex.values().length; // team vertices after enums
+    static int TEAMID_OFFSET = Vertex.values().length; // team vertices enumerated after enums
 
     int numTeams;
     FlowEdge[] teamToSink;

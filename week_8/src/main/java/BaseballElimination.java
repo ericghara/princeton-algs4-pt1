@@ -58,7 +58,7 @@ public class BaseballElimination {
         return t.isEliminated() ? t.getCertOfElim() : null;
     }
 
-    public static void eliminate(Team elimTeam, Division division) {
+    private static void eliminate(Team elimTeam, Division division) {
         if (elimTeam.hasCertOfElim()) { return; } // team already has COE calculated
         DivisionEdgeContainer edges = new DivisionEdgeContainer(elimTeam, division);
         int V = edges.getNumberOfVertices();
@@ -69,14 +69,14 @@ public class BaseballElimination {
         elimTeam.setCertOfElim(COE);
     }
 
-    public static List<String> generateCertificateOfElimination(FordFulkerson FF, DivisionEdgeContainer edges, Division division) {
+    private static List<String> generateCertificateOfElimination(FordFulkerson FF, DivisionEdgeContainer edges, Division division) {
         ArrayList<String> COE = new ArrayList<>();
         int numTeams = edges.getNumberOfTeams();
         for (int teamID = 0; teamID < numTeams; teamID++) {
             int vertexID = edges.getVertexID(teamID);
             if (FF.inCut(vertexID)) {
                 String name = division.getTeam(teamID)
-                        .getTeamName();
+                                      .getTeamName();
                 COE.add(name);
             }
         }
