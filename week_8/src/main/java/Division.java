@@ -1,6 +1,10 @@
 import edu.princeton.cs.algs4.In;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -86,7 +90,6 @@ public class Division implements Iterable<Team> {
             }
         }
     }
-
 
     @Override
     public Iterator<Team> iterator() {

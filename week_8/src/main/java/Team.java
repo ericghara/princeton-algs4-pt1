@@ -1,4 +1,7 @@
-import java.util.*;
+import java.util.Spliterator;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -85,6 +88,7 @@ public class Team implements Comparable<Team> {
         isEliminated = !certOfElim.isEmpty();
     }
 
+    @Override
     public int compareTo(Team that) {
         return Integer.compare(this.wins,that.getWins());
     }
