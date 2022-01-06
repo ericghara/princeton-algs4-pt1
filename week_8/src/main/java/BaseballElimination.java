@@ -1,51 +1,86 @@
+import edu.princeton.cs.algs4.FlowNetwork;
+import edu.princeton.cs.algs4.FordFulkerson;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 public class BaseballElimination {
-    private final League league;
+    private final Division division;
+    private HashMap<Integer,ArrayList<String>> certOfElim;
 
     // create a baseball division from given filename in format specified below
     public BaseballElimination(String filename) {
-        league = new League(filename);
-
+        division = new Division(filename);
     }
     // number of teams
     public int numberOfTeams() {
-        return league.getNumberOfTeams();
+        return division.getNumberOfTeams();
     }
     // all teams
     public Iterable<String> teams() {
-        return league.getTeamNames();
+        return division.getTeamNames();
     }
     // number of wins for given team
     public int wins(String team) {
-        int teamNum = league.getTeamNum(team);
-        return league.getWins(teamNum);
+        Team t = division.getTeam(team);
+        return t.getWins();
     }
     // number of losses for given team
     public int losses(String team) {
-        int teamNum = league.getTeamNum(team);
-        return league.getLosses(teamNum);
+        Team t = division.getTeam(team);
+        return t.getLosses();
     }
     // number of remaining games for given team
     public int remaining(String team) {
-        int teamNum = league.getTeamNum(team);
-        return league.getRemaining(teamNum);
+        Team t = division.getTeam(team);
+        return t.getRemaining();
     }
     // number of remaining games between team1 and team2
     public int against(String team1, String team2) {
-        int teamNum1 = league.getTeamNum(team1);
-        int teamNum2 = league.getTeamNum(team2);
-        return league.getRemainingAgainst(teamNum1, teamNum2);
+        Team t1 = division.getTeam(team1);
+        Team t2 = division.getTeam(team2);
+        return t1.getRemainingAgainst(t2);
     }
 
     // is given team eliminated?
     public boolean isEliminated(String team) {
-
+        Team t = division.getTeam(team);
+        eliminate(t, division);
+        return t.isEliminated();
     }              
 
     // subset R of teams that eliminates given team; null if not eliminated
     public Iterable<String> certificateOfElimination(String team) {
+        Team t = division.getTeam(team);
+        eliminate(t, division);
+        return t.isEliminated() ? t.getCertOfElim() : null;
+    }
 
+    public static void eliminate(Team elimTeam, Division division) {
+        if (elimTeam.hasCertOfElim()) { return; } // team already has COE calculated
+        DivisionEdgeContainer edges = new DivisionEdgeContainer(elimTeam, division);
+        int V = edges.getNumberOfVertices();
+        FlowNetwork FN = new FlowNetwork(V);
+        edges.forEach(FN::addEdge);
+        FordFulkerson FF = new FordFulkerson(FN, DivisionEdgeContainer.Vertex.S.ID, DivisionEdgeContainer.Vertex.T.ID);
+        List<String> COE = generateCertificateOfElimination(FF,edges,division);
+        elimTeam.setCertOfElim(COE);
+    }
+
+    public static List<String> generateCertificateOfElimination(FordFulkerson FF, DivisionEdgeContainer edges, Division division) {
+        ArrayList<String> COE = new ArrayList<>();
+        int numTeams = edges.getNumberOfTeams();
+        for (int teamID = 0; teamID < numTeams; teamID++) {
+            int vertexID = edges.getVertexID(teamID);
+            if (FF.inCut(vertexID)) {
+                String name = division.getTeam(teamID)
+                        .getTeamName();
+                COE.add(name);
+            }
+        }
+        return COE;
     }
 
     public static void main(String[] args) {
