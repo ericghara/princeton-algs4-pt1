@@ -1,13 +1,10 @@
 import edu.princeton.cs.algs4.In;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Division {
+public class Division implements Iterable<Team> {
     private final int N; // number of teams
     private final Team[] teams;
     private final HashMap<String,Team> teamLookup;
@@ -84,15 +81,16 @@ public class Division {
         String[] maxTeamName = {maxW.getTeamName()};
 
         for (Team t:teams) {
-            int w = t.getWins();
-            int r = t.getRemaining();
-            if ( w + r < maxW.getWins() ) {
+            if ( t.getMaxDivisionWins() < maxW.getWins() ) {
                 t.setCertOfElim(Arrays.asList(maxTeamName));
             }
         }
     }
 
 
-
-
+    @Override
+    public Iterator<Team> iterator() {
+        return Arrays.asList(teams)
+                     .iterator();
+    }
 }

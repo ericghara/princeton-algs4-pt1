@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 public class DivisionEdgeContainer implements Iterable<FlowEdge>{
     public enum Vertex {
         S(0), T(1); // source and sink respectively
-        final int ID;
+        final int Id;
 
-        Vertex(int ID) {
-            this.ID = ID;
+        Vertex(int Id) {
+            this.Id = Id;
         }
     }
     static int TEAMID_OFFSET = Vertex.values().length; // team vertices after enums
@@ -32,58 +32,53 @@ public class DivisionEdgeContainer implements Iterable<FlowEdge>{
     }
 
     private void addGames(Team elimTeam, Division division) {
-
-        // looping in a way to avoid duplicate games, ie add team 2 vs team 1 but not duplicate team 1 vs team 2
-        // start from 1 because team 0 will always just return games against itself (ie 0)
-        int elimTeamID = elimTeam.getId();
-        for (int opp1ID = 1; opp1ID < numTeams; opp1ID++) {
-            if (opp1ID == elimTeamID) {
+        int elimTeamId = elimTeam.getId();
+        for (Team opp1 : division) {
+            int opp1_ID = opp1.getId();
+            if (opp1_ID == elimTeamId) {
                 continue;
             }
-            Iterator<Integer> gameSchedule = division.getTeam(opp1ID)
-                    .getGameSchedule()
-                    .iterator();
-            int opp2ID = 0;
-            for (int opp2Id = 0; opp2ID < opp1ID; opp2ID++) {
-                int numGames = gameSchedule.next();
-                if (numGames > 0 && opp2ID != elimTeamID) {
-                    addGamesVertex(opp1ID, opp2ID, numGames);
+            for (Team opp2 : division) {
+                int opp2_ID = opp2.getId();
+                // Avoids double counting games ie only adds 2 vs 1 instead of both 2 vs 1 and 1 vs 2.
+                if (opp2_ID >= opp1_ID) { break; }
+                int numGames = opp1.getRemainingAgainst(opp2);
+                // games against elimTeam are assumed to be a loss for opp1, so are not counted
+                if (numGames > 0 && opp2_ID != elimTeamId) {
+                    addGamesVertex(opp1_ID, opp2_ID, numGames);
                 }
-                opp2ID++;
             }
         }
     }
 
 
     private void addTeams(Team elimTeam, Division division) {
-        int N = division.getNumberOfTeams();
         int maxAllowedWins = elimTeam.getMaxDivisionWins();
-        for (int teamNum = 0; teamNum < N; teamNum++) {
-            Team team = division.getTeam(teamNum);
+        for (Team team : division) {
             // note initializes edge for elimTeam, but since no other edges will connect to it, vertex will always be on
             // sink side of min cut.
             int winCapacity = maxAllowedWins - team.getWins();
-            addTeam(teamNum, winCapacity);
+            addTeam(team.getId(), winCapacity);
         }
     }
 
-    public void addGamesVertex(int teamID1, int teamID2, int numGames) {
-        int gameVertID = getNextGameID();
-        int teamVertID1 = getVertexID(teamID1);
-        int teamVertID2 = getVertexID(teamID2);
+    public void addGamesVertex(int teamId1, int teamId2, int numGames) {
+        int gameVertID = getNextGameId();
+        int teamVertID1 = getVertexID(teamId1);
+        int teamVertID2 = getVertexID(teamId2);
 
         addSourceToGame(gameVertID, numGames);
         addGameToTeam(gameVertID, teamVertID1);
         addGameToTeam(gameVertID, teamVertID2);
     }
 
-    public void addTeam(int teamID, int maxWins) {
-        int teamVertID = getVertexID(teamID);
-        teamToSink[teamVertID] = new FlowEdge(teamVertID, Vertex.T.ID, maxWins);
+    public void addTeam(int teamId, int maxWins) {
+        int teamVertId = getVertexID(teamId);
+        teamToSink[teamId] = new FlowEdge(teamVertId, Vertex.T.Id, maxWins);
     }
 
     private void addSourceToGame(int gameVertID, int numGames) {
-        FlowEdge edge = new FlowEdge(Vertex.S.ID, gameVertID, numGames);
+        FlowEdge edge = new FlowEdge(Vertex.S.Id, gameVertID, numGames);
         sourceToGame.add(edge);
     }
 
@@ -92,17 +87,17 @@ public class DivisionEdgeContainer implements Iterable<FlowEdge>{
         gameToTeam.add(edge);
     }
 
-    public int getNextGameID() {
+    public int getNextGameId() {
         return getNumberOfVertices();
     }
 
-    public int getVertexID(int teamID) {
-        verifyTeamID(teamID);
-        return  TEAMID_OFFSET + teamID;
+    public int getVertexID(int teamId) {
+        verifyTeamId(teamId);
+        return  TEAMID_OFFSET + teamId;
     }
 
-    private void verifyTeamID(int teamID) {
-        if (teamID >= numTeams || teamID < 0) {
+    private void verifyTeamId(int teamId) {
+        if (teamId >= numTeams || teamId < 0) {
             throw new IllegalArgumentException("vertexID does not match a valid team");
         }
     }

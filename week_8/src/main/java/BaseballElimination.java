@@ -64,7 +64,7 @@ public class BaseballElimination {
         int V = edges.getNumberOfVertices();
         FlowNetwork FN = new FlowNetwork(V);
         edges.forEach(FN::addEdge);
-        FordFulkerson FF = new FordFulkerson(FN, DivisionEdgeContainer.Vertex.S.ID, DivisionEdgeContainer.Vertex.T.ID);
+        FordFulkerson FF = new FordFulkerson(FN, DivisionEdgeContainer.Vertex.S.Id, DivisionEdgeContainer.Vertex.T.Id);
         List<String> COE = generateCertificateOfElimination(FF,edges,division);
         elimTeam.setCertOfElim(COE);
     }
