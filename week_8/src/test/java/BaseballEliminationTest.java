@@ -9,7 +9,11 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
-import java.util.*;
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -28,7 +32,7 @@ class BaseballEliminationTest {
      * @param delimPattern a valid {@link java.util.regex.Pattern}.
      * @return a (potentially irregular) {@code String} matrix.
      */
-    String[][] readCsv(String filepath, String delimPattern) {
+    static String[][] readCsv(String filepath, String delimPattern) {
         Scanner scanner;
         try {
             File file = new File(filepath);
@@ -108,8 +112,9 @@ class BaseballEliminationTest {
          * @param actual   correct iterator
          * @param <T>      type of iterators to be compared
          */
-        @ParameterizedTest
+
         @MethodSource("teamsTestSource")
+        @ParameterizedTest(name = "teamsTest {index}")
         <T> void iteratorTester(Iterator<T> expected, Iterator<T> actual) {
             while (expected.hasNext()) {
                 Assertions.assertTrue(actual.hasNext());

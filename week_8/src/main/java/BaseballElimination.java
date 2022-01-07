@@ -1,92 +1,112 @@
-import edu.princeton.cs.algs4.FlowNetwork;
-import edu.princeton.cs.algs4.FordFulkerson;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BaseballElimination {
+
     private final Division division;
 
-    // create a baseball division from given filename in format specified below
+    /**
+     * Create a new baseball division from the filename specified.
+     * @param filename input csv file with format specified above
+     */
     public BaseballElimination(String filename) {
         division = new Division(filename);
     }
-    // number of teams
+
+    /**
+     * Number of teams in the division
+     * @return number of teams in the division
+     */
     public int numberOfTeams() {
         return division.getNumberOfTeams();
     }
-    // all teams
+
+    /**
+     * All team names
+     * @return team names as Strings
+     */
     public Iterable<String> teams() {
         return division.getTeamNames();
     }
-    // number of wins for given team
+
+    /**
+     * Total wins for a team so far in the season.
+     * @param team team name, must exactly match input csv
+     * @return number of wins
+     */
     public int wins(String team) {
-        Team t = division.getTeam(team);
+        Division.Team t = division.getTeam(team);
         return t.getWins();
     }
-    // number of losses for given team
+
+    /**
+     * Total losses for a team so far in the season.
+     * @param team name, must exactly match input csv
+     * @return number of losses
+     */
     public int losses(String team) {
-        Team t = division.getTeam(team);
+        Division.Team t = division.getTeam(team);
         return t.getLosses();
     }
-    // number of remaining games for given team
+
+    /**
+     * Total remaining games for a team in the season.
+     * @param team name, must exactly match input csv
+     * @return games remaining in the season
+     */
     public int remaining(String team) {
-        Team t = division.getTeam(team);
+        Division.Team t = division.getTeam(team);
         return t.getRemaining();
     }
-    // number of remaining games between team1 and team2
+
+    /**
+     * Total remaining games between two teams in the division.
+     * @param team1 a team name, must exactly match input csv
+     * @param team2 a team name, must exactly match input csv
+     * @return games remaining in the season
+     */
     public int against(String team1, String team2) {
-        Team t1 = division.getTeam(team1);
-        Team t2 = division.getTeam(team2);
+        Division.Team t1 = division.getTeam(team1);
+        Division.Team t2 = division.getTeam(team2);
         return t1.getRemainingAgainst(t2);
     }
 
-    // is given team eliminated?
+    /**
+     * Check if a team has been eliminated from potentially winning (or tying for first place) the division.
+     * @param team a team name, must exactly match input csv
+     * @return true if eliminated, false if not eliminated
+     */
     public boolean isEliminated(String team) {
-        Team t = division.getTeam(team);
-        eliminate(t, division);
+        Division.Team t = division.getTeam(team);
         return t.isEliminated();
-    }              
+    }
 
-    // subset R of teams that eliminates given team; null if not eliminated
+    /**
+     * The teams which eliminate the input team.  If a single team is returned this represents simple math that
+     * another team has more wins the input team could possibly win.  If multiple teams are returned then a more
+     * complex scenario is represented where any one team could lose all its games, but because of these losses
+     * their competitors must win games.  Within this network all possible combinations of wins and losses would
+     * exclude the input team.
+     *
+     * @param team a team name, must exactly match input csv
+     * @return names of team(s) which eliminate the input team.
+     */
     public Iterable<String> certificateOfElimination(String team) {
-        Team t = division.getTeam(team);
-        eliminate(t, division);
+        Division.Team t = division.getTeam(team);
         return t.isEliminated() ? t.getCertOfElim() : null;
     }
 
-    private static void eliminate(Team elimTeam, Division division) {
-        if (elimTeam.hasCertOfElim()) { return; } // team already has COE calculated
-        DivisionEdgeContainer edges = new DivisionEdgeContainer(elimTeam, division);
-        int V = edges.getNumberOfVertices();
-        FlowNetwork FN = new FlowNetwork(V);
-        edges.forEach(FN::addEdge);
-        FordFulkerson FF = new FordFulkerson(FN, DivisionEdgeContainer.Vertex.S.Id, DivisionEdgeContainer.Vertex.T.Id);
-        List<String> COE = generateCertificateOfElimination(FF,edges,division);
-        elimTeam.setCertOfElim(COE);
-    }
-
-    private static List<String> generateCertificateOfElimination(FordFulkerson FF, DivisionEdgeContainer edges, Division division) {
-        ArrayList<String> COE = new ArrayList<>();
-        int numTeams = edges.getNumberOfTeams();
-        for (int teamID = 0; teamID < numTeams; teamID++) {
-            int vertexID = edges.getVertexID(teamID);
-            if (FF.inCut(vertexID)) {
-                String name = division.getTeam(teamID)
-                                      .getTeamName();
-                COE.add(name);
-            }
-        }
-        return COE;
-    }
-
+    /**
+     * A demo method which takes a league csv file as an input (see {@link BaseballElimination} for format) and
+     * prints the teams which are eliminated along with their certificate of elimination.
+     *
+     * @param args path to league csv file
+     */
     public static void main(String[] args) {
-        BaseballElimination division = new BaseballElimination(args[0]);
-        for (String team : division.teams()) {
-            if (division.isEliminated(team)) {
+        BaseballElimination BE = new BaseballElimination(args[0]);
+        for (String team : BE.teams()) {
+            if (BE.isEliminated(team)) {
                 StdOut.print(team + " is eliminated by the subset R = { ");
-                for (String t : division.certificateOfElimination(team)) {
+                for (String t : BE.certificateOfElimination(team)) {
                     StdOut.print(t + " ");
                 }
                 StdOut.println("}");
@@ -96,5 +116,4 @@ public class BaseballElimination {
             }
         }
     }
-
 }
