@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.Spliterator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
 /**
  * This class allows a set of teams to be represented as a division.  This class is mostly a data class, but it does
@@ -109,23 +108,12 @@ public class Division implements Iterable<Division.Team> {
             this.wins = wins;
             this.losses = losses;
             this.remaining = remaining;
-            this.gameSchedule = gameSchedule;
+            this.gameSchedule = gameSchedule.clone();
             isEliminated = null;
         }
 
         public int getWins() {
             return wins;
-        }
-
-        /**
-         * Max division wins are not equal to wins + remaining, as remaining includes games that are outside of the division
-         * @return wins + Σ(division games remaining)
-         */
-        public int getMaxDivisionWins() {
-            int w = getWins();
-            Spliterator<Integer> games = getGameSchedule().spliterator();
-            return StreamSupport.stream(games, false)
-                                .reduce(w, Integer::sum);
         }
 
         public int getLosses() {

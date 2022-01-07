@@ -31,7 +31,7 @@ class Eliminator {
     private final Division.Team elimTeam;
 
     /**
-     * Determines elimination status of teams within a division
+     * Determines elimination status of teams within a division.
      * @see Division.Team#setCertOfElim
      * @param division a division of teams
      */
@@ -55,6 +55,12 @@ class Eliminator {
         }
     }
 
+    /**
+     * Creates an eliminator instance for a single team in the division.
+     *
+     * @param elimTeam team to perform elimination modeling on
+     * @param division division which the team is a member of
+     */
     private Eliminator(Division.Team elimTeam, Division division) {
         this.division = division;
         this.elimTeam = elimTeam;
@@ -66,6 +72,14 @@ class Eliminator {
         addGames();
     }
 
+    /**
+     * Adds all edges which connect to game vertices.  For each game vertex 3 edges are created:
+     * <ol>
+     *     <li>source to vertex representing game between team 1 and team 2</li>
+     *     <li>game vertex to team 1 vertex</li>
+     *     <li>game vertex to team 2 vertex</li>
+     * </ol>
+     */
     private void addGames() {
         int elimTeamId = elimTeam.getId();
         for (Division.Team opp1 : division) {
@@ -86,7 +100,9 @@ class Eliminator {
         }
     }
 
-
+    /**
+     * Add edges which connect team vertices to the sink.
+     */
     private void addTeams() {
         int maxAllowedWins = elimTeam.getMaxPossibleWins();
         for (Division.Team team : division) {
@@ -97,6 +113,16 @@ class Eliminator {
         }
     }
 
+    /**
+     * Adds edges for the remaining games between team1 and team2.  The number of games represents the flow
+     * capacity of the source to the game vertex.  The edges connecting the game vertex to the respective team
+     * verticies have infinite capacity.
+     *
+     * @param teamId1 ID of one team in the game
+     * @param teamId2 ID of the other team in the game
+     * @param numGames number of games left between teams in the season
+     * @see Eliminator#addGames()
+     */
     private void addGamesVertex(int teamId1, int teamId2, int numGames) {
         int gameVertID = getNextGameId();
         int teamVertID1 = getVertexID(teamId1);
@@ -107,6 +133,16 @@ class Eliminator {
         addGameToTeam(gameVertID, teamVertID2);
     }
 
+    /**
+     * Adds the team to sink vertex for a single team.  The capacity of this vertex represents the number of games
+     * that this team may win before the {@code elimTeam} would be eliminated.  To ensure this value is not negative
+     * a trivial elemination check must be performed before calling.
+     *
+     * @param teamId id of team to add
+     * @param maxWins number of games team may win before knocking out the {@code elimTeam} from the playoffs
+     * @see Eliminator#addTeams()
+     * @see Eliminator#processDivision(Division)
+     */
     private void addTeam(int teamId, int maxWins) {
         int teamVertId = getVertexID(teamId);
         teamToSink[teamId] = new FlowEdge(teamVertId, Vertex.SINK.Id, maxWins);
