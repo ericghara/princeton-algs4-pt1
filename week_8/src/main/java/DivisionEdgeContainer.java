@@ -17,10 +17,10 @@ public class DivisionEdgeContainer implements Iterable<FlowEdge>{
     }
     static int TEAMID_OFFSET = Vertex.values().length; // team vertices enumerated after enums
 
-    int numTeams;
-    FlowEdge[] teamToSink;
-    LinkedList<FlowEdge> sourceToGame;
-    LinkedList<FlowEdge> gameToTeam;
+    private final int numTeams;
+    private final FlowEdge[] teamToSink;
+    private final LinkedList<FlowEdge> sourceToGame;
+    private final LinkedList<FlowEdge> gameToTeam;
 
     public DivisionEdgeContainer(Team elimTeam, Division division) {
         numTeams = division.getNumberOfTeams();

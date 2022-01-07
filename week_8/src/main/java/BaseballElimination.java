@@ -3,12 +3,10 @@ import edu.princeton.cs.algs4.FordFulkerson;
 import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class BaseballElimination {
     private final Division division;
-    private HashMap<Integer,ArrayList<String>> certOfElim;
 
     // create a baseball division from given filename in format specified below
     public BaseballElimination(String filename) {

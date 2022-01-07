@@ -7,7 +7,7 @@ import java.util.stream.StreamSupport;
 
 public class Team implements Comparable<Team> {
     private final int id, wins, losses, remaining;
-    private String teamName;
+    private final String teamName;
     private final int[] gameSchedule;
     private Boolean isEliminated;
     private List<String> certOfElim;

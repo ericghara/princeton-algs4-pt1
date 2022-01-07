@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.util.*;
@@ -48,20 +47,25 @@ class BaseballEliminationTest {
     }
 
     @ParameterizedTest
-    @CsvFileSource(resources = "/test_outline.csv", delimiter = '|')
+    @CsvFileSource(resources = "/isEliminatedTest.csv", delimiterString = ", ")
     void isEliminated(String testFile, String elimTeams) {
         BaseballElimination BE = new BaseballElimination(testFile);
-        String[] expected = elimTeams.split(" ");
+        String[] expected = elimTeams.split("\\W+");
         Arrays.asList(expected).forEach((name) -> assertTrue(BE.isEliminated(name)));
     }
 
-    @Test
-    void certificateOfElimination() {
-        BaseballElimination BE = new BaseballElimination(TEST_LEAGUE);
+    @ParameterizedTest
+    @CsvFileSource(resources = "/certificateOfEliminationTest.csv", delimiterString = ", ")
+    void certificateOfElimination(String testFile, String elimTeam, String CertOfElim) {
+        BaseballElimination BE = new BaseballElimination(testFile);
+        String[] expectedCOE = CertOfElim.split("\\W+");
         LinkedList<String> COE = new LinkedList<>();
-        BE.certificateOfElimination("Philadelphia")
-                .forEach(COE::add);
-        assertEquals(2, COE.size());
+        BE.certificateOfElimination(elimTeam)
+            .forEach(COE::add);
+        String[] actualCOE = COE.toArray(new String[0]);
+        Arrays.sort(expectedCOE);
+        Arrays.sort(actualCOE);
+        Assertions.assertArrayEquals(expectedCOE, actualCOE);
     }
 
 
